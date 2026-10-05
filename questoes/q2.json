@@ -1,16 +1,18 @@
 {
   "id": "q2",
   "tipo": "funcao",
-  "titulo": "Amplitude em janelas",
-  "enunciado": "Escreva a função `amplitudes(precos, k)`, que retorna uma lista com a diferença entre o maior e o menor valor de cada janela **deslizante** de `k` elementos consecutivos.\n\nSe não couber nenhuma janela, retorne `[]`.\n\n**Proibido** usar `max`, `min` e fatiamento (`lista[a:b]`).\n\nExemplo: `amplitudes([3, 1, 4, 1, 5], 3)` → `[3, 3, 4]`.",
+  "titulo": "Oscilação de preços",
+  "enunciado": "Uma corretora quer avisar seus clientes quando uma ação está **instável**. Para isso, ela analisa os preços de fechamento em **janelas deslizantes**: grupos de `k` dias consecutivos, em que cada janela começa um dia depois da anterior. A **amplitude** de uma janela é a diferença entre o maior e o menor preço dentro dela.\n\nSua tarefa é criar uma função chamada `amplitudes` que receba:\n- uma lista `precos` com valores inteiros positivos, na ordem dos dias;\n- um inteiro `k`, indicando quantos dias consecutivos formam uma janela.\n\nA função deve retornar uma lista com a amplitude de **cada janela**, na ordem em que as janelas aparecem.\n\n### Regras importantes\n- A primeira janela começa no índice `0`, a segunda no índice `1`, e assim por diante, até a última janela que ainda caiba inteira na lista.\n- Se `k` for maior que o tamanho da lista, nenhuma janela cabe e a função deve retornar uma lista vazia.\n- Se a lista estiver vazia, a função deve retornar uma lista vazia.\n- Você pode assumir que `k` é um inteiro maior que 0.\n\n### Exemplo 1\n```python\nprecos = [3, 1, 4, 1, 5]\nk = 3\n```\nAs janelas são:\n- `[3, 1, 4]` → maior `4`, menor `1` → amplitude `3`\n- `[1, 4, 1]` → maior `4`, menor `1` → amplitude `3`\n- `[4, 1, 5]` → maior `5`, menor `1` → amplitude `4`\n\nLogo, a função deve retornar `[3, 3, 4]`.\n\n### Exemplo 2\n```python\nprecos = [7, 2, 9, 4]\nk = 1\n```\nCada janela tem um único preço, então toda amplitude é `0`. Retorno: `[0, 0, 0, 0]`.\n\n### Exemplo 3\n```python\nprecos = [1, 2]\nk = 3\n```\nNenhuma janela de 3 dias cabe em 2 dias. Retorno: `[]`.\n\nÉ proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`, e também o fatiamento de listas (`lista[a:b]`).",
   "funcao": "amplitudes",
   "template": "def amplitudes(precos, k):\n    pass\n",
-  "proibido": ["max", "min"],
+  "proibido": ["min", "max", "sum", "sorted", "filter", "map"],
   "sem_fatiamento": true,
   "testes": [
     {"args": [[3, 1, 4, 1, 5], 3], "esperado": [3, 3, 4]},
     {"args": [[10, 10, 10], 2], "esperado": [0, 0]},
     {"args": [[1, 2], 3], "esperado": []},
-    {"args": [[7, 2, 9, 4], 1], "esperado": [0, 0, 0, 0]}
+    {"args": [[7, 2, 9, 4], 1], "esperado": [0, 0, 0, 0]},
+    {"args": [[], 2], "esperado": []},
+    {"args": [[5, 1, 9], 3], "esperado": [8]}
   ]
 }

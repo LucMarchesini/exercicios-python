@@ -1,15 +1,17 @@
 {
   "id": "q4",
   "tipo": "funcao",
-  "titulo": "Propagação",
-  "enunciado": "Escreva a função `propaga(mapa)`, onde `mapa` é uma lista de listas: `1` = infectado, `0` = saudável, `2` = parede.\n\nApós um passo, todo `0` vizinho (cima/baixo/esquerda/direita) de um `1` **do mapa original** vira `1`.\n\nRetorne um **novo** mapa, sem alterar o original.\n\nExemplo: `propaga([[1, 0, 0, 0]])` → `[[1, 1, 0, 0]]`.",
+  "titulo": "Surto na cidade",
+  "enunciado": "A secretaria de saúde representa os quarteirões de uma cidade em uma lista de listas, onde cada sublista é uma rua. Cada quarteirão pode estar:\n- `0`: sem casos;\n- `1`: com um foco de infecção;\n- `2`: isolado (área bloqueada, que não recebe nem transmite a infecção).\n\nA secretaria quer prever **como o surto estará amanhã**: todo quarteirão sem casos (`0`) que seja vizinho de um foco (`1`) na horizontal (esquerda e direita) ou na vertical (cima e baixo) passa a ser um foco. Quarteirões na diagonal **não** contam.\n\nEscreva uma função chamada `propaga` que recebe esse mapa e retorna uma **nova lista de listas**, com as mesmas dimensões, representando o dia seguinte.\n\n**Atenção:** a propagação acontece **uma única vez** e considera apenas os focos do mapa **original**. Um quarteirão que acabou de ser infectado não infecta seus vizinhos no mesmo dia.\n\n### Exemplo 1\nEntrada:\n```\n[\n  [0, 0, 0],\n  [0, 1, 0],\n  [0, 0, 0]\n]\n```\nSaída:\n```\n[\n  [0, 1, 0],\n  [1, 1, 1],\n  [0, 1, 0]\n]\n```\nEntendendo o canto superior esquerdo: seus vizinhos são o da direita (`0`) e o de baixo (`0`), nenhum é foco, então continua `0`. Já o quarteirão do meio da primeira linha tem o foco `1` logo abaixo, então passa a ser `1`.\n\n### Exemplo 2\nEntrada: `[[1, 0, 0, 0]]` → Saída: `[[1, 1, 0, 0]]`\n\nO terceiro quarteirão não é infectado, porque seu vizinho só virou foco neste mesmo dia.\n\n### Exemplo 3\nEntrada: `[[1, 2], [0, 0]]` → Saída: `[[1, 2], [1, 0]]`\n\nO `2` é isolado e não muda. O quarteirão de baixo à direita só é vizinho do `2` e do `0`, então continua `0`.\n\n### Restrições\n- A entrada será sempre uma lista de listas válida, com pelo menos uma linha e uma coluna.\n- As sublistas terão o mesmo comprimento.\n- O mapa recebido não pode ser modificado.\n- É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.",
   "funcao": "propaga",
   "template": "def propaga(mapa):\n    pass\n",
+  "proibido": ["min", "max", "sum", "sorted", "filter", "map"],
   "nao_altera_args": true,
   "testes": [
     {"args": [[[0, 0, 0], [0, 1, 0], [0, 0, 0]]], "esperado": [[0, 1, 0], [1, 1, 1], [0, 1, 0]]},
     {"args": [[[1, 0, 0, 0]]], "esperado": [[1, 1, 0, 0]]},
     {"args": [[[1, 2], [0, 0]]], "esperado": [[1, 2], [1, 0]]},
-    {"args": [[[0, 0], [0, 0]]], "esperado": [[0, 0], [0, 0]]}
+    {"args": [[[0, 0], [0, 0]]], "esperado": [[0, 0], [0, 0]]},
+    {"args": [[[1, 2, 0], [0, 2, 0]]], "esperado": [[1, 2, 0], [1, 2, 0]]}
   ]
 }

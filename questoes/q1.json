@@ -1,16 +1,18 @@
 {
   "id": "q1",
   "tipo": "funcao",
-  "titulo": "Validador de cartão",
-  "enunciado": "Escreva a função `valida_cartao(numero)`, que recebe um **int**.\n\nPercorra os dígitos da direita para a esquerda **sem converter para string** (use `%` e `//`). Dobre um dígito sim, outro não, começando pelo **segundo** da direita; se o dobro passar de 9, subtraia 9. Some tudo.\n\nRetorne `True` se a soma for múltipla de 10, senão `False`.\n\nExemplo: `valida_cartao(18)` → `True` (8 + 2 = 10).",
+  "titulo": "Cartão válido",
+  "enunciado": "Números de cartão de crédito terminam com um dígito de controle calculado pelo **algoritmo de Luhn**, que permite detectar a maioria dos erros de digitação antes mesmo de consultar o banco. Por exemplo, `79927398713` é um número válido e `79927398710` não é.\n\nImplemente a função `valida_cartao` que recebe um número inteiro não negativo e devolve `True` se ele for válido pelo algoritmo de Luhn e `False` caso contrário.\n\nA função deve operar da seguinte forma:\n\n1. Considere os dígitos do número da **direita para a esquerda**.\n2. O dígito mais à direita é mantido. O segundo é **dobrado**, o terceiro é mantido, o quarto é dobrado, e assim por diante, **alternando**.\n3. Sempre que um dígito dobrado resultar em um valor **maior que 9**, subtraia `9` dele.\n4. Some todos os valores obtidos (mantidos e dobrados).\n5. O número é válido se a soma for **divisível por 10**.\n\n### Exemplo de raciocínio\nConsidere o número `79927398713`.\n- Dígitos da direita para a esquerda: `3, 1, 7, 8, 9, 3, 7, 2, 9, 9, 7`\n- Dobrando um sim, outro não, a partir do segundo:\n  - `3` → mantido → `3`\n  - `1` → dobrado → `2`\n  - `7` → mantido → `7`\n  - `8` → dobrado → `16` → `16 - 9 = 7`\n  - `9` → mantido → `9`\n  - `3` → dobrado → `6`\n  - `7` → mantido → `7`\n  - `2` → dobrado → `4`\n  - `9` → mantido → `9`\n  - `9` → dobrado → `18` → `18 - 9 = 9`\n  - `7` → mantido → `7`\n- Soma: `70`. Como `70 % 10 == 0`, a função retorna `True`.\n\n### Exemplos\n```python\nprint(valida_cartao(79927398713))   # True\nprint(valida_cartao(79927398710))   # False\nprint(valida_cartao(18))            # True\n```\n\n### Restrições e observações\n- O valor recebido será sempre um inteiro maior ou igual a zero.\n- O número `0` tem um único dígito, e a soma é `0`.\n- Não é permitido converter o número em texto nem usar funções de strings.\n- É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter`, `map` e `str`.",
   "funcao": "valida_cartao",
   "template": "def valida_cartao(numero):\n    pass\n",
-  "proibido": ["str"],
+  "proibido": ["min", "max", "sum", "sorted", "filter", "map", "str"],
   "testes": [
     {"args": [79927398713], "esperado": true},
     {"args": [79927398710], "esperado": false},
     {"args": [18], "esperado": true},
     {"args": [12], "esperado": false},
-    {"args": [0], "esperado": true}
+    {"args": [0], "esperado": true},
+    {"args": [4111111111111111], "esperado": true},
+    {"args": [4111111111111112], "esperado": false}
   ]
 }

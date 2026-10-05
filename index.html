@@ -112,9 +112,40 @@
   th, td { padding: 10px 12px; border-bottom: 1px solid var(--borda); vertical-align: top; }
   tbody tr:last-child td { border-bottom: none; }
   td:first-child { color: var(--suave); width: 1%; }
-  td:last-child { width: 1%; text-align: center; font-size: 22px; line-height: 1.1; }
-  td pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: 13px/1.5 ui-monospace, Consolas, monospace; }
-  .erro { color: var(--erro); margin-top: 4px !important; }
+  td.res { width: 1%; text-align: center; font-size: 20px; line-height: 1.1; }
+  td code { font: 13px/1.5 ui-monospace, Consolas, monospace; word-break: break-word; }
+  tr.teste.feito { cursor: pointer; }
+  tr.teste.feito:hover td { background: var(--hover); }
+  tr.teste.falhou td { background: var(--falha-bg); }
+  tr.teste.falhou:hover td { filter: brightness(.98); }
+  tr.teste:has(+ tr.detalhe:not([hidden])) td { border-bottom: none; }
+  tr.detalhe > td { padding: 4px 12px 16px 40px; background: var(--falha-bg); }
+  tr.teste.passou + tr.detalhe > td { background: var(--ok-bg); }
+  .bloco { margin-top: 10px; min-width: 0; }
+  .rotulo { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--suave); margin-bottom: 4px; }
+  .lado { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .bloco pre {
+    margin: 0; padding: 8px 0; border-radius: 8px; overflow-x: auto;
+    background: var(--painel); border: 1px solid var(--borda);
+    font: 13px/1.55 ui-monospace, "Cascadia Code", Consolas, monospace;
+  }
+  .ln { display: block; padding: 0 10px; white-space: pre-wrap; word-break: break-word; }
+  .ln.dif { background: rgba(234, 179, 8, .28); box-shadow: inset 3px 0 #eab308; }
+  .ln.falta { background: rgba(37, 99, 235, .16); box-shadow: inset 3px 0 #3b82f6; }
+  .ln.sobra { background: rgba(220, 38, 38, .16); box-shadow: inset 3px 0 #ef4444; }
+  .ln.vazio { color: var(--suave); font-style: italic; }
+  .bloco pre.erro { padding: 8px 10px; color: var(--erro); white-space: pre-wrap; border-color: var(--erro); }
+  .aviso { margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--texto); }
+
+  /* enunciado: títulos, listas numeradas e blocos de código */
+  #enunciado h3 { font-size: 17px; margin: 22px 0 8px; }
+  #enunciado ol { margin: 0 0 12px; padding-left: 24px; }
+  #enunciado li > ul { margin: 4px 0 0; }
+  #enunciado pre {
+    margin: 0 0 14px; padding: 12px 14px; border-radius: 8px; overflow-x: auto;
+    background: var(--codigo-bg); border: 1px solid var(--borda);
+  }
+  #enunciado pre code { background: none; color: var(--texto); padding: 0; font-size: 13px; line-height: 1.55; }
 
   /* celular */
   @media (max-width: 760px) {
@@ -130,6 +161,8 @@
     .CodeMirror { height: 260px; font-size: 13px; }
     #botoes button { flex: 1; }
     #status { flex-basis: 100%; }
+    .lado { grid-template-columns: 1fr; gap: 0; }
+    tr.detalhe > td { padding-left: 12px; }
   }
 </style>
 </head>
@@ -147,7 +180,7 @@
   <div id="nota"></div>
   <div class="tabela">
   <table id="testes" hidden>
-    <thead><tr><th>#</th><th>Entrada</th><th>Esperado</th><th>Obtido</th><th></th></tr></thead>
+    <thead><tr><th>#</th><th>Teste</th><th></th></tr></thead>
     <tbody></tbody>
   </table>
   </div>
@@ -271,14 +304,48 @@ const gravar = (k, v) => localStorage.setItem("mpl:" + k, v);
 // ---------- utilidades ----------
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+// markdown simples: títulos, parágrafos, listas (aninhadas, numeradas), blocos de código, `código` e **negrito**
 function markdown(md) {
-  return md.split(/\n\s*\n/).map((bloco) => {
-    const inline = (s) => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
-    const linhas = bloco.split("\n");
-    if (linhas.every((l) => l.startsWith("- ")))
-      return "<ul>" + linhas.map((l) => "<li>" + inline(l.slice(2)) + "</li>").join("") + "</ul>";
-    return "<p>" + inline(bloco) + "</p>";
-  }).join("");
+  const inline = (s) => s.split("`").map((parte, i) =>
+    i % 2 ? `<code>${esc(parte)}</code>` : esc(parte).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")).join("");
+  const out = [], pilha = [], linhas = md.split("\n");
+  let para = [];
+  const fecharPara = () => { if (para.length) out.push(`<p>${inline(para.join(" "))}</p>`); para = []; };
+  const fecharListas = (indent) => {
+    while (pilha.length && pilha[pilha.length - 1].indent > indent) out.push(`</li></${pilha.pop().tag}>`);
+  };
+  for (let i = 0; i < linhas.length; i++) {
+    const l = linhas[i];
+    let m;
+    if (l.trimStart().startsWith("```")) {
+      fecharPara(); fecharListas(-1);
+      const codigo = [];
+      while (++i < linhas.length && !linhas[i].trimStart().startsWith("```")) codigo.push(linhas[i]);
+      out.push(`<pre><code>${esc(codigo.join("\n"))}</code></pre>`);
+    } else if ((m = l.match(/^(#{1,6})\s+(.*)/))) {
+      fecharPara(); fecharListas(-1);
+      out.push(`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`);
+    } else if ((m = l.match(/^(\s*)([-*]|\d+\.)\s+(.*)/))) {
+      fecharPara();
+      const indent = m[1].length, tag = /\d/.test(m[2]) ? "ol" : "ul";
+      fecharListas(indent);
+      const topo = pilha[pilha.length - 1];
+      if (topo && topo.indent === indent && topo.tag === tag) out.push("</li><li>");
+      else {
+        if (topo && topo.indent === indent) out.push(`</li></${pilha.pop().tag}>`);
+        out.push(`<${tag}><li>`);
+        pilha.push({ indent, tag });
+      }
+      out.push(inline(m[3]));
+    } else if (!l.trim()) {
+      fecharPara();
+    } else {
+      fecharListas(-1);
+      para.push(l.trim());
+    }
+  }
+  fecharPara(); fecharListas(-1);
+  return out.join("");
 }
 
 // repr estilo Python para valores vindos do JSON
@@ -336,18 +403,63 @@ function linhasTabela(q) {
   tbody.innerHTML = "";
   $("testes").hidden = false;
   return q.testes.map((t, i) => {
-    const entrada = q.tipo === "funcao" ? `${q.funcao}(${t.args.map(pyRepr).join(", ")})` : t.entradas.join("\n");
-    const esperado = q.tipo === "funcao" ? pyRepr(t.esperado) : t.saida.join("\n");
+    const resumo = q.tipo === "funcao" ? `${q.funcao}(${t.args.map(pyRepr).join(", ")})` : "entradas: " + t.entradas.join(", ");
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${i + 1}</td><td><pre>${esc(entrada)}</pre></td><td><pre>${esc(esperado)}</pre></td><td></td><td></td>`;
-    tbody.appendChild(tr);
+    tr.className = "teste";
+    tr.innerHTML = `<td>${i + 1}</td><td><code>${esc(resumo)}</code></td><td class="res">⏳</td>`;
+    const det = document.createElement("tr");
+    det.className = "detalhe";
+    det.hidden = true;
+    det.innerHTML = `<td colspan="3"></td>`;
+    tr.onclick = () => { if (tr.classList.contains("feito")) det.hidden = !det.hidden; };
+    tbody.append(tr, det);
+    Object.assign(tr, { q, t, det });
     return tr;
   });
 }
 
+const bloco = (titulo, corpo, classe = "") => `<div class="bloco ${classe}"><div class="rotulo">${titulo}</div>${corpo}</div>`;
+const pre = (linhas) => `<pre>${linhas.map((l) => `<span class="ln ${l.c || ""}">${esc(l.t) || " "}</span>`).join("")}</pre>`;
+
+// compara linha a linha (questões de programa) e devolve as linhas marcadas + um aviso
+function diffLinhas(esp, rec) {
+  let k = 0;
+  while (k < esp.length && k < rec.length && esp[k] === rec[k]) k++;
+  // havendo diferença no meio, só ela é destacada; sem diferença, destaca as linhas que faltam/sobram no fim
+  const meio = k < esp.length && k < rec.length;
+  const e = esp.map((t, i) => ({ t, c: meio ? (i === k ? "dif" : "") : i >= rec.length ? "falta" : "" }));
+  const r = rec.map((t, i) => ({ t, c: meio ? (i === k ? "dif" : "") : i >= esp.length ? "sobra" : "" }));
+  const avisos = [];
+  if (k < esp.length && k < rec.length) avisos.push(`Primeira diferença na linha ${k + 1}.`);
+  if (rec.length < esp.length) avisos.push(`Faltam ${esp.length - rec.length} linha(s) na saída.`);
+  if (rec.length > esp.length) avisos.push(`Sobram ${rec.length - esp.length} linha(s) na saída.`);
+  return { e, r, aviso: avisos.join(" ") };
+}
+
 function preencher(tr, ok, obtido, erro) {
-  tr.cells[3].innerHTML = `<pre>${esc(obtido || "")}</pre>` + (erro ? `<pre class="erro">${esc(erro)}</pre>` : "");
-  tr.cells[4].textContent = ok ? "✅" : "❌";
+  const { q, t, det } = tr;
+  tr.classList.add("feito", ok ? "passou" : "falhou");
+  tr.cells[2].textContent = ok ? "✅" : "❌";
+  const entrada = q.tipo === "funcao"
+    ? pre([{ t: `${q.funcao}(${t.args.map(pyRepr).join(", ")})` }])
+    : pre(t.entradas.map((x) => ({ t: x })));
+  let esperado, recebido, aviso = "";
+  if (q.tipo === "funcao") {
+    esperado = pre([{ t: pyRepr(t.esperado) }]);
+    recebido = erro ? null : pre([{ t: obtido }]);
+  } else {
+    const d = diffLinhas(t.saida.map((l) => l.trim()), obtido ? obtido.split("\n") : []);
+    esperado = pre(d.e.length ? d.e : [{ t: "(nenhuma linha)", c: "vazio" }]);
+    recebido = erro ? null : pre(d.r.length ? d.r : [{ t: "(nenhuma linha)", c: "vazio" }]);
+    aviso = erro ? "" : d.aviso;
+  }
+  det.cells[0].innerHTML =
+    bloco(q.tipo === "funcao" ? "Entrada" : "Entrada (linhas digitadas)", entrada) +
+    `<div class="lado">` + bloco("Saída esperada", esperado) +
+    (erro ? bloco("Erro", `<pre class="erro">${esc(erro)}</pre>`, "com-erro")
+          : bloco("Saída recebida", recebido)) + `</div>` +
+    (aviso ? `<div class="aviso">${esc(aviso)}</div>` : "");
+  det.hidden = ok;
 }
 
 // ---------- worker (Pyodide) ----------
