@@ -1,0 +1,16 @@
+{
+  "id": "q1",
+  "tipo": "funcao",
+  "titulo": "Validador de cartão",
+  "enunciado": "Escreva a função `valida_cartao(numero)`, que recebe um **int**.\n\nPercorra os dígitos da direita para a esquerda **sem converter para string** (use `%` e `//`). Dobre um dígito sim, outro não, começando pelo **segundo** da direita; se o dobro passar de 9, subtraia 9. Some tudo.\n\nRetorne `True` se a soma for múltipla de 10, senão `False`.\n\nExemplo: `valida_cartao(18)` → `True` (8 + 2 = 10).",
+  "funcao": "valida_cartao",
+  "template": "def valida_cartao(numero):\n    pass\n",
+  "proibido": ["str"],
+  "testes": [
+    {"args": [79927398713], "esperado": true},
+    {"args": [79927398710], "esperado": false},
+    {"args": [18], "esperado": true},
+    {"args": [12], "esperado": false},
+    {"args": [0], "esperado": true}
+  ]
+}

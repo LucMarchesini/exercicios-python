@@ -1,0 +1,14 @@
+{
+  "id": "q5",
+  "tipo": "funcao",
+  "titulo": "Pares com soma alvo",
+  "enunciado": "Escreva a função `pares_soma(lista, alvo)`, que retorna todos os pares de índices `[i, j]`, com `i < j`, cujos valores somam `alvo`.\n\nOs pares devem vir em ordem crescente de `i` e depois de `j`.\n\nExemplo: `pares_soma([1, 4, 3, 2], 5)` → `[[0, 1], [2, 3]]`.",
+  "funcao": "pares_soma",
+  "template": "def pares_soma(lista, alvo):\n    pass\n",
+  "testes": [
+    {"args": [[1, 4, 3, 2], 5], "esperado": [[0, 1], [2, 3]]},
+    {"args": [[2, 2, 2], 4], "esperado": [[0, 1], [0, 2], [1, 2]]},
+    {"args": [[1, 1], 5], "esperado": []},
+    {"args": [[], 0], "esperado": []}
+  ]
+}

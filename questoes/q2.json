@@ -1,0 +1,16 @@
+{
+  "id": "q2",
+  "tipo": "funcao",
+  "titulo": "Amplitude em janelas",
+  "enunciado": "Escreva a função `amplitudes(precos, k)`, que retorna uma lista com a diferença entre o maior e o menor valor de cada janela **deslizante** de `k` elementos consecutivos.\n\nSe não couber nenhuma janela, retorne `[]`.\n\n**Proibido** usar `max`, `min` e fatiamento (`lista[a:b]`).\n\nExemplo: `amplitudes([3, 1, 4, 1, 5], 3)` → `[3, 3, 4]`.",
+  "funcao": "amplitudes",
+  "template": "def amplitudes(precos, k):\n    pass\n",
+  "proibido": ["max", "min"],
+  "sem_fatiamento": true,
+  "testes": [
+    {"args": [[3, 1, 4, 1, 5], 3], "esperado": [3, 3, 4]},
+    {"args": [[10, 10, 10], 2], "esperado": [0, 0]},
+    {"args": [[1, 2], 3], "esperado": []},
+    {"args": [[7, 2, 9, 4], 1], "esperado": [0, 0, 0, 0]}
+  ]
+}

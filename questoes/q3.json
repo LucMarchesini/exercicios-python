@@ -1,0 +1,14 @@
+{
+  "id": "q3",
+  "tipo": "programa",
+  "titulo": "Monitor de temperatura",
+  "enunciado": "Escreva um **programa** que lê temperaturas inteiras (uma por `input()`) até ser digitado `-999`.\n\n- Leitura fora de [-50, 60]: imprima `leitura invalida` (ela não conta).\n- Se houver **3 leituras válidas consecutivas acima de 40**, imprima `alerta: superaquecimento apos N leituras` (N = leituras válidas até ali) e encerre.\n- Ao digitar `-999`: imprima `media: X.X em N leituras` (média com 1 casa decimal) ou `nenhuma leitura` se não houve leitura válida.\n\nExemplo: entradas `25`, `30`, `-999` → `media: 27.5 em 2 leituras`.",
+  "template": "# leia as temperaturas com input()\n",
+  "testes": [
+    {"entradas": ["25", "30", "-999"], "saida": ["media: 27.5 em 2 leituras"]},
+    {"entradas": ["-999"], "saida": ["nenhuma leitura"]},
+    {"entradas": ["41", "42", "70", "43", "-999"], "saida": ["leitura invalida", "alerta: superaquecimento apos 3 leituras"]},
+    {"entradas": ["41", "20", "45", "50", "55", "-999"], "saida": ["alerta: superaquecimento apos 5 leituras"]},
+    {"entradas": ["100", "-999"], "saida": ["leitura invalida", "nenhuma leitura"]}
+  ]
+}

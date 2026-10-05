@@ -1,0 +1,15 @@
+{
+  "id": "q4",
+  "tipo": "funcao",
+  "titulo": "Propagação",
+  "enunciado": "Escreva a função `propaga(mapa)`, onde `mapa` é uma lista de listas: `1` = infectado, `0` = saudável, `2` = parede.\n\nApós um passo, todo `0` vizinho (cima/baixo/esquerda/direita) de um `1` **do mapa original** vira `1`.\n\nRetorne um **novo** mapa, sem alterar o original.\n\nExemplo: `propaga([[1, 0, 0, 0]])` → `[[1, 1, 0, 0]]`.",
+  "funcao": "propaga",
+  "template": "def propaga(mapa):\n    pass\n",
+  "nao_altera_args": true,
+  "testes": [
+    {"args": [[[0, 0, 0], [0, 1, 0], [0, 0, 0]]], "esperado": [[0, 1, 0], [1, 1, 1], [0, 1, 0]]},
+    {"args": [[[1, 0, 0, 0]]], "esperado": [[1, 1, 0, 0]]},
+    {"args": [[[1, 2], [0, 0]]], "esperado": [[1, 2], [1, 0]]},
+    {"args": [[[0, 0], [0, 0]]], "esperado": [[0, 0], [0, 0]]}
+  ]
+}
