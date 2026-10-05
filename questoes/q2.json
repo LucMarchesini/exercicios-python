@@ -1,18 +1,17 @@
 {
   "id": "q2",
   "tipo": "funcao",
-  "titulo": "Oscilação de preços",
-  "enunciado": "Uma corretora quer avisar seus clientes quando uma ação está **instável**. Para isso, ela analisa os preços de fechamento em **janelas deslizantes**: grupos de `k` dias consecutivos, em que cada janela começa um dia depois da anterior. A **amplitude** de uma janela é a diferença entre o maior e o menor preço dentro dela.\n\nSua tarefa é criar uma função chamada `amplitudes` que receba:\n- uma lista `precos` com valores inteiros positivos, na ordem dos dias;\n- um inteiro `k`, indicando quantos dias consecutivos formam uma janela.\n\nA função deve retornar uma lista com a amplitude de **cada janela**, na ordem em que as janelas aparecem.\n\n### Regras importantes\n- A primeira janela começa no índice `0`, a segunda no índice `1`, e assim por diante, até a última janela que ainda caiba inteira na lista.\n- Se `k` for maior que o tamanho da lista, nenhuma janela cabe e a função deve retornar uma lista vazia.\n- Se a lista estiver vazia, a função deve retornar uma lista vazia.\n- Você pode assumir que `k` é um inteiro maior que 0.\n\n### Exemplo 1\n```python\nprecos = [3, 1, 4, 1, 5]\nk = 3\n```\nAs janelas são:\n- `[3, 1, 4]` → maior `4`, menor `1` → amplitude `3`\n- `[1, 4, 1]` → maior `4`, menor `1` → amplitude `3`\n- `[4, 1, 5]` → maior `5`, menor `1` → amplitude `4`\n\nLogo, a função deve retornar `[3, 3, 4]`.\n\n### Exemplo 2\n```python\nprecos = [7, 2, 9, 4]\nk = 1\n```\nCada janela tem um único preço, então toda amplitude é `0`. Retorno: `[0, 0, 0, 0]`.\n\n### Exemplo 3\n```python\nprecos = [1, 2]\nk = 3\n```\nNenhuma janela de 3 dias cabe em 2 dias. Retorno: `[]`.\n\nÉ proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`, e também o fatiamento de listas (`lista[a:b]`).",
-  "funcao": "amplitudes",
-  "template": "def amplitudes(precos, k):\n    pass\n",
+  "titulo": "Mensagem secreta",
+  "enunciado": "Dois amigos trocam mensagens cifradas usando uma variação da **Cifra de César**. Em vez de deslocar todas as letras pela mesma quantidade, eles usam uma **lista de chaves** que se repete ao longo da mensagem.\n\nEscreva uma função chamada `cifra` que receba:\n- uma string `texto` com letras minúsculas sem acento e outros caracteres (espaços, pontuação);\n- uma lista `chaves` de inteiros, com pelo menos um elemento.\n\nA função deve retornar o texto cifrado.\n\n### Regras importantes\n- Use o alfabeto `'abcdefghijklmnopqrstuvwxyz'`.\n- A 1ª **letra** do texto é deslocada por `chaves[0]`, a 2ª letra por `chaves[1]`, e assim por diante. Quando as chaves acabam, recomeça do início.\n- O alfabeto é **circular**: depois do `z` vem o `a`. Chaves negativas deslocam para trás.\n- Caracteres que não são letras são mantidos como estão e **não consomem chave**.\n\n### Exemplo 1\n```python\ntexto = 'ola mundo'\nchaves = [1, 2]\n```\n- `o` +1 → `p`, `l` +2 → `n`, `a` +1 → `b`\n- o espaço é mantido e não consome chave\n- `m` +2 → `o`, `u` +1 → `v`, `n` +2 → `p`, `d` +1 → `e`, `o` +2 → `q`\n\nRetorno: `'pnb ovpeq'`\n\n### Exemplo 2\n```python\ntexto = 'zebra!'\nchaves = [3]\n```\nO `z` +3 dá a volta no alfabeto e vira `c`. O `!` é mantido. Retorno: `'cheud!'`\n\n### Exemplo 3\n```python\ntexto = 'python'\nchaves = [-1]\n```\nRetorno: `'oxsgnm'`\n\nÉ proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.",
+  "funcao": "cifra",
+  "template": "def cifra(texto, chaves):\n    pass\n",
   "proibido": ["min", "max", "sum", "sorted", "filter", "map"],
-  "sem_fatiamento": true,
   "testes": [
-    {"args": [[3, 1, 4, 1, 5], 3], "esperado": [3, 3, 4]},
-    {"args": [[10, 10, 10], 2], "esperado": [0, 0]},
-    {"args": [[1, 2], 3], "esperado": []},
-    {"args": [[7, 2, 9, 4], 1], "esperado": [0, 0, 0, 0]},
-    {"args": [[], 2], "esperado": []},
-    {"args": [[5, 1, 9], 3], "esperado": [8]}
+    {"args": ["abc", [1]], "esperado": "bcd"},
+    {"args": ["ola mundo", [1, 2]], "esperado": "pnb ovpeq"},
+    {"args": ["zebra!", [3]], "esperado": "cheud!"},
+    {"args": ["a b", [0, 25]], "esperado": "a a"},
+    {"args": ["python", [-1]], "esperado": "oxsgnm"},
+    {"args": ["", [5]], "esperado": ""}
   ]
 }

@@ -1,289 +1,262 @@
-# Enunciados completos (substituem os da PLATAFORMA_EXERCICIOS.md)
+# Enunciados completos (substituem os anteriores)
 
-Instruções para o Claude Code: atualize `enunciado`, `template`, `testes` e `proibido` de cada `questoes/qN.json` com o conteúdo abaixo. Renderize o enunciado como markdown (títulos, listas numeradas, blocos de código). Em **todas** as questões, `proibido` inclui `min, max, sum, sorted, filter, map`; a Q1 também inclui `str`; a Q2 mantém `sem_fatiamento`; a Q4 mantém `nao_altera_args`. Valide de novo com soluções de referência e apague-as.
+Instruções para o Claude Code: substitua as 5 questões por estas. Atualize `titulo`, `funcao`, `tipo`, `enunciado`, `template`, `testes` e `proibido` de cada `questoes/qN.json`. Renderize o enunciado como markdown. Em **todas** as questões, `proibido` = `min, max, sum, sorted, filter, map`. A Q1 tem `nao_altera_args`. Remova as flags antigas (`sem_fatiamento`, `str` proibido) que não se aplicam mais. Valide com soluções de referência e apague-as.
 
 ---
 
-## Q1 — Cartão válido
+## Q1 — O sapo e as vitórias-régias
 
-Números de cartão de crédito terminam com um dígito de controle calculado pelo **algoritmo de Luhn**, que permite detectar a maioria dos erros de digitação antes mesmo de consultar o banco. Por exemplo, `79927398713` é um número válido e `79927398710` não é.
+Um sapo está em um rio com uma fileira de vitórias-régias, representada por uma lista de inteiros. O sapo começa na vitória-régia de **índice 0**. Cada vitória-régia tem um número que indica quantas posições o sapo pula a partir dela: valores positivos levam para a direita, negativos para a esquerda e `0` faz o sapo pular no mesmo lugar.
 
-Implemente a função `valida_cartao` que recebe um número inteiro não negativo e devolve `True` se ele for válido pelo algoritmo de Luhn e `False` caso contrário.
+O detalhe é que as vitórias-régias são frágeis: **toda vez que o sapo sai de uma delas, o número dela aumenta em 1**.
+
+Implemente a função `pulos_ate_sair` que recebe a lista de vitórias-régias e retorna **quantos pulos** o sapo dá até cair fora da fileira (índice menor que `0` ou maior que o último).
 
 A função deve operar da seguinte forma:
 
-1. Considere os dígitos do número da **direita para a esquerda**.
-2. O dígito mais à direita é mantido. O segundo é **dobrado**, o terceiro é mantido, o quarto é dobrado, e assim por diante, **alternando**.
-3. Sempre que um dígito dobrado resultar em um valor **maior que 9**, subtraia `9` dele.
-4. Some todos os valores obtidos (mantidos e dobrados).
-5. O número é válido se a soma for **divisível por 10**.
+1. Comece com o sapo na posição `0` e o contador de pulos em `0`.
+2. Enquanto o sapo estiver dentro da fileira:
+   1. Leia o valor da vitória-régia atual: esse é o tamanho do pulo.
+   2. Aumente em `1` o valor dessa vitória-régia.
+   3. Mova o sapo pelo tamanho do pulo lido no passo 1.
+   4. Some `1` ao contador.
+3. Retorne o contador.
 
 ### Exemplo de raciocínio
-Considere o número `79927398713`.
-- Dígitos da direita para a esquerda: `3, 1, 7, 8, 9, 3, 7, 2, 9, 9, 7`
-- Dobrando um sim, outro não, a partir do segundo:
-  - `3` → mantido → `3`
-  - `1` → dobrado → `2`
-  - `7` → mantido → `7`
-  - `8` → dobrado → `16` → `16 - 9 = 7`
-  - `9` → mantido → `9`
-  - `3` → dobrado → `6`
-  - `7` → mantido → `7`
-  - `2` → dobrado → `4`
-  - `9` → mantido → `9`
-  - `9` → dobrado → `18` → `18 - 9 = 9`
-  - `7` → mantido → `7`
-- Soma: `70`. Como `70 % 10 == 0`, a função retorna `True`.
+Considere `[0, 3, 0, 1, -3]`.
+
+| Pulo | Posição | Valor lido | Lista depois | Nova posição |
+|---|---|---|---|---|
+| 1 | 0 | 0 | `[1, 3, 0, 1, -3]` | 0 |
+| 2 | 0 | 1 | `[2, 3, 0, 1, -3]` | 1 |
+| 3 | 1 | 3 | `[2, 4, 0, 1, -3]` | 4 |
+| 4 | 4 | -3 | `[2, 4, 0, 1, -2]` | 1 |
+| 5 | 1 | 4 | `[2, 5, 0, 1, -2]` | 5 → fora |
+
+Portanto, a função retorna `5`.
 
 ### Exemplos
 ```python
-print(valida_cartao(79927398713))   # True
-print(valida_cartao(79927398710))   # False
-print(valida_cartao(18))            # True
+print(pulos_ate_sair([0, 3, 0, 1, -3]))  # 5
+print(pulos_ate_sair([0]))               # 2
+print(pulos_ate_sair([]))                # 0
 ```
 
 ### Restrições e observações
-- O valor recebido será sempre um inteiro maior ou igual a zero.
-- O número `0` tem um único dígito, e a soma é `0`.
-- Não é permitido converter o número em texto nem usar funções de strings.
-- É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter`, `map` e `str`.
+- Se a lista estiver vazia, o sapo já começa fora e a resposta é `0`.
+- **A lista recebida não pode ser modificada**: trabalhe em uma cópia.
+- É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
 
-Testes: `79927398713→True`, `79927398710→False`, `18→True`, `12→False`, `0→True`, `4111111111111111→True`, `4111111111111112→False`
+Testes: `[0,3,0,1,-3]→5`, `[1]→1`, `[5]→1`, `[]→0`, `[2,-1,-1]→4`, `[0]→2`
 
 ---
 
-## Q2 — Oscilação de preços
+## Q2 — Mensagem secreta
 
-Uma corretora quer avisar seus clientes quando uma ação está **instável**. Para isso, ela analisa os preços de fechamento em **janelas deslizantes**: grupos de `k` dias consecutivos, em que cada janela começa um dia depois da anterior. A **amplitude** de uma janela é a diferença entre o maior e o menor preço dentro dela.
+Dois amigos trocam mensagens cifradas usando uma variação da **Cifra de César**. Em vez de deslocar todas as letras pela mesma quantidade, eles usam uma **lista de chaves** que se repete ao longo da mensagem.
 
-Sua tarefa é criar uma função chamada `amplitudes` que receba:
-- uma lista `precos` com valores inteiros positivos, na ordem dos dias;
-- um inteiro `k`, indicando quantos dias consecutivos formam uma janela.
+Escreva uma função chamada `cifra` que receba:
+- uma string `texto` com letras minúsculas sem acento e outros caracteres (espaços, pontuação);
+- uma lista `chaves` de inteiros, com pelo menos um elemento.
 
-A função deve retornar uma lista com a amplitude de **cada janela**, na ordem em que as janelas aparecem.
+A função deve retornar o texto cifrado.
 
 ### Regras importantes
-- A primeira janela começa no índice `0`, a segunda no índice `1`, e assim por diante, até a última janela que ainda caiba inteira na lista.
-- Se `k` for maior que o tamanho da lista, nenhuma janela cabe e a função deve retornar uma lista vazia.
-- Se a lista estiver vazia, a função deve retornar uma lista vazia.
-- Você pode assumir que `k` é um inteiro maior que 0.
+- Use o alfabeto `'abcdefghijklmnopqrstuvwxyz'`.
+- A 1ª **letra** do texto é deslocada por `chaves[0]`, a 2ª letra por `chaves[1]`, e assim por diante. Quando as chaves acabam, recomeça do início.
+- O alfabeto é **circular**: depois do `z` vem o `a`. Chaves negativas deslocam para trás.
+- Caracteres que não são letras são mantidos como estão e **não consomem chave**.
 
 ### Exemplo 1
 ```python
-precos = [3, 1, 4, 1, 5]
-k = 3
+texto = 'ola mundo'
+chaves = [1, 2]
 ```
-As janelas são:
-- `[3, 1, 4]` → maior `4`, menor `1` → amplitude `3`
-- `[1, 4, 1]` → maior `4`, menor `1` → amplitude `3`
-- `[4, 1, 5]` → maior `5`, menor `1` → amplitude `4`
+- `o` +1 → `p`, `l` +2 → `n`, `a` +1 → `b`
+- o espaço é mantido e não consome chave
+- `m` +2 → `o`, `u` +1 → `v`, `n` +2 → `p`, `d` +1 → `e`, `o` +2 → `q`
 
-Logo, a função deve retornar `[3, 3, 4]`.
+Retorno: `'pnb ovpeq'`
 
 ### Exemplo 2
 ```python
-precos = [7, 2, 9, 4]
-k = 1
+texto = 'zebra!'
+chaves = [3]
 ```
-Cada janela tem um único preço, então toda amplitude é `0`. Retorno: `[0, 0, 0, 0]`.
+O `z` +3 dá a volta no alfabeto e vira `c`. O `!` é mantido. Retorno: `'cheud!'`
 
 ### Exemplo 3
 ```python
-precos = [1, 2]
-k = 3
+texto = 'python'
+chaves = [-1]
 ```
-Nenhuma janela de 3 dias cabe em 2 dias. Retorno: `[]`.
+Retorno: `'oxsgnm'`
 
-É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`, e também o fatiamento de listas (`lista[a:b]`).
+É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
 
-Testes: `([3,1,4,1,5],3)→[3,3,4]`, `([10,10,10],2)→[0,0]`, `([1,2],3)→[]`, `([7,2,9,4],1)→[0,0,0,0]`, `([],2)→[]`, `([5,1,9],3)→[8]`
+Testes: `('abc',[1])→'bcd'`, `('ola mundo',[1,2])→'pnb ovpeq'`, `('zebra!',[3])→'cheud!'`, `('a b',[0,25])→'a a'`, `('python',[-1])→'oxsgnm'`, `('',[5])→''`
 
 ---
 
-## Q3 — Monitor da estufa (`tipo: programa`)
+## Q3 — Editor com desfazer (`tipo: programa`)
 
-Uma estufa de plantas tem sensores que medem a temperatura e a umidade do ar. Quando o ambiente fica crítico várias vezes seguidas, o sistema precisa disparar um alerta para que a equipe intervenha antes que as plantas sejam prejudicadas.
+Você está construindo um editor de texto minimalista, controlado por comandos digitados. O diferencial dele é o comando **desfazer**, que reverte a última alteração feita, quantas vezes o usuário quiser.
 
-Escreva um programa que acompanhe as leituras dos sensores. O programa deve perguntar ao usuário repetidamente:
+Escreva um programa que pergunte repetidamente `Comando: ` e execute o que foi pedido. O texto começa vazio e é formado por uma sequência de palavras.
 
-1. A temperatura medida, com a mensagem `Temperatura (C): `.
-2. Se a temperatura for válida, a umidade medida, com a mensagem `Umidade (%): `.
+### Comandos
+- `escrever PALAVRA`: adiciona `PALAVRA` ao final do texto.
+- `apagar`: remove a última palavra do texto. Se o texto estiver vazio, imprime `"nada para apagar"`.
+- `desfazer`: reverte a última alteração (`escrever` ou `apagar`) que ainda não foi desfeita. Se não houver nada para desfazer, imprime `"nada para desfazer"`.
+- `mostrar`: imprime o texto atual, com as palavras separadas por espaço, ou `"(vazio)"` se não houver palavras.
+- `fim`: encerra o programa.
 
-Ao longo da execução, o programa deve contabilizar o total de leituras válidas, o total de leituras críticas e a soma das temperaturas válidas.
+Qualquer outra entrada, inclusive `escrever` sem palavra ou com mais de uma palavra, imprime `"comando invalido"`.
 
-### Valores inválidos
-- Se a temperatura estiver fora do intervalo de `-50` a `60` (inclusive), o programa deve imprimir `"temperatura invalida"` e **não** perguntar a umidade.
-- Se a umidade estiver fora do intervalo de `0` a `100` (inclusive), o programa deve imprimir `"umidade invalida"`.
+### Operações
+Cada `escrever`, `apagar` ou `desfazer` **bem-sucedido** conta como uma operação. Comandos que imprimiram mensagem de erro, `mostrar` e `fim` não contam.
 
-Leituras com temperatura ou umidade inválidas devem ser ignoradas, e o programa passa para a próxima leitura. Leituras ignoradas não são contabilizadas.
+Desfazer um `apagar` devolve a palavra apagada ao final do texto. Um `desfazer` não pode ser desfeito.
 
-### Leituras críticas
-- Uma leitura é considerada **crítica** quando pelo menos uma destas situações acontece:
-  - a temperatura é maior que `40`;
-  - a umidade é menor que `20`.
-
-O programa também deve contabilizar quantas leituras críticas aparecem **uma logo depois da outra**.
-- Quando aparece uma leitura válida não crítica, essa contagem volta para `0`.
-- Leituras ignoradas não aumentam nem zeram essa contagem.
-- Se aparecerem **3 leituras críticas seguidas**, o programa deve imprimir um alerta e parar imediatamente:
-
-```
-"alerta: P leituras criticas em N leituras"
-```
-Em que `P` é o total de leituras críticas e `N` é o total de leituras válidas.
-
-### Encerramento (quando o usuário digitar `-999`)
-Se a temperatura informada for `-999`, o programa não pergunta a umidade, imprime um resumo e para.
-- Se nenhuma leitura válida foi registrada: `"nenhuma leitura registrada"`
-- Caso contrário: `"monitoramento encerrado: media X C em N leituras, P criticas"`, com a média das temperaturas válidas com **uma casa decimal**.
+### Encerramento
+Ao digitar `fim`, o programa imprime `"texto final: T (N operacoes)"`, em que `T` é o texto atual (ou `(vazio)`) e `N` o total de operações.
 
 ### Exemplo 1
 ```
-> Temperatura (C): 42
-> Umidade (%): 50
-> Temperatura (C): 70
-temperatura invalida
-> Temperatura (C): 38
-> Umidade (%): 10
-> Temperatura (C): 45
-> Umidade (%): 120
-umidade invalida
-> Temperatura (C): 41
-> Umidade (%): 30
-alerta: 3 leituras criticas em 3 leituras
+> Comando: escrever a
+> Comando: escrever b
+> Comando: apagar
+> Comando: mostrar
+a
+> Comando: desfazer
+> Comando: mostrar
+a b
+> Comando: desfazer
+> Comando: desfazer
+> Comando: mostrar
+(vazio)
+> Comando: fim
+texto final: (vazio) (6 operacoes)
 ```
 
 ### Exemplo 2
 ```
-> Temperatura (C): 41
-> Umidade (%): 50
-> Temperatura (C): 20
-> Umidade (%): 50
-> Temperatura (C): 45
-> Umidade (%): 10
-> Temperatura (C): 39
-> Umidade (%): 15
-> Temperatura (C): 50
-> Umidade (%): 30
-alerta: 4 leituras criticas em 5 leituras
-```
-
-### Exemplo 3
-```
-> Temperatura (C): 25
-> Umidade (%): 50
-> Temperatura (C): 30
-> Umidade (%): 60
-> Temperatura (C): -999
-monitoramento encerrado: media 27.5 C em 2 leituras, 0 criticas
+> Comando: apagar
+nada para apagar
+> Comando: desfazer
+nada para desfazer
+> Comando: pular
+comando invalido
+> Comando: fim
+texto final: (vazio) (0 operacoes)
 ```
 
 É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
 
 Testes (entradas → saída):
-- `25,50,30,60,-999` → `monitoramento encerrado: media 27.5 C em 2 leituras, 0 criticas`
-- `-999` → `nenhuma leitura registrada`
-- `42,50,70,38,10,45,120,41,30` → `temperatura invalida` / `umidade invalida` / `alerta: 3 leituras criticas em 3 leituras`
-- `41,50,20,50,45,10,39,15,50,30,-999` → `alerta: 4 leituras criticas em 5 leituras`
-- `100,25,150,-999` → `temperatura invalida` / `umidade invalida` / `nenhuma leitura registrada`
+- `escrever ola, escrever mundo, mostrar, fim` → `ola mundo` / `texto final: ola mundo (2 operacoes)`
+- `fim` → `texto final: (vazio) (0 operacoes)`
+- `apagar, desfazer, pular, escrever, fim` → `nada para apagar` / `nada para desfazer` / `comando invalido` / `comando invalido` / `texto final: (vazio) (0 operacoes)`
+- `escrever a, escrever b, apagar, mostrar, desfazer, mostrar, desfazer, desfazer, mostrar, fim` → `a` / `a b` / `(vazio)` / `texto final: (vazio) (6 operacoes)`
+- `escrever x, escrever y, apagar, apagar, desfazer, escrever z, fim` → `texto final: x z (6 operacoes)`
 
 ---
 
-## Q4 — Surto na cidade
+## Q4 — Jogo da velha gigante
 
-A secretaria de saúde representa os quarteirões de uma cidade em uma lista de listas, onde cada sublista é uma rua. Cada quarteirão pode estar:
-- `0`: sem casos;
-- `1`: com um foco de infecção;
-- `2`: isolado (área bloqueada, que não recebe nem transmite a infecção).
+Um clube de jogos inventou um **jogo da velha de qualquer tamanho**: o tabuleiro é uma lista de listas quadrada `N x N`, e cada casa contém `'X'`, `'O'` ou `'.'` (vazia). Um jogador vence quando ocupa uma **linha inteira**, uma **coluna inteira** ou uma das **duas diagonais** inteiras.
 
-A secretaria quer prever **como o surto estará amanhã**: todo quarteirão sem casos (`0`) que seja vizinho de um foco (`1`) na horizontal (esquerda e direita) ou na vertical (cima e baixo) passa a ser um foco. Quarteirões na diagonal **não** contam.
-
-Escreva uma função chamada `propaga` que recebe esse mapa e retorna uma **nova lista de listas**, com as mesmas dimensões, representando o dia seguinte.
-
-**Atenção:** a propagação acontece **uma única vez** e considera apenas os focos do mapa **original**. Um quarteirão que acabou de ser infectado não infecta seus vizinhos no mesmo dia.
+Escreva uma função chamada `vencedor` que recebe o tabuleiro e retorna `'X'` ou `'O'` se algum jogador venceu, ou `''` (string vazia) se ninguém venceu.
 
 ### Exemplo 1
-Entrada:
 ```
 [
-  [0, 0, 0],
-  [0, 1, 0],
-  [0, 0, 0]
+  ['O', 'X', '.'],
+  ['O', 'X', '.'],
+  ['O', '.', 'X']
 ]
 ```
-Saída:
-```
-[
-  [0, 1, 0],
-  [1, 1, 1],
-  [0, 1, 0]
-]
-```
-Entendendo o canto superior esquerdo: seus vizinhos são o da direita (`0`) e o de baixo (`0`), nenhum é foco, então continua `0`. Já o quarteirão do meio da primeira linha tem o foco `1` logo abaixo, então passa a ser `1`.
+A primeira coluna é toda `'O'`. Retorno: `'O'`
 
 ### Exemplo 2
-Entrada: `[[1, 0, 0, 0]]` → Saída: `[[1, 1, 0, 0]]`
-
-O terceiro quarteirão não é infectado, porque seu vizinho só virou foco neste mesmo dia.
+```
+[
+  ['.', '.', 'O'],
+  ['.', 'O', '.'],
+  ['O', '.', '.']
+]
+```
+A diagonal secundária (do canto superior direito ao inferior esquerdo) é toda `'O'`. Retorno: `'O'`
 
 ### Exemplo 3
-Entrada: `[[1, 2], [0, 0]]` → Saída: `[[1, 2], [1, 0]]`
-
-O `2` é isolado e não muda. O quarteirão de baixo à direita só é vizinho do `2` e do `0`, então continua `0`.
+```
+[
+  ['X', 'O', 'X'],
+  ['X', 'O', 'O'],
+  ['O', 'X', 'X']
+]
+```
+Tabuleiro cheio, mas nenhuma linha, coluna ou diagonal completa. Retorno: `''`
 
 ### Restrições
-- A entrada será sempre uma lista de listas válida, com pelo menos uma linha e uma coluna.
-- As sublistas terão o mesmo comprimento.
-- O mapa recebido não pode ser modificado.
+- O tabuleiro tem pelo menos uma casa e é sempre quadrado.
+- Você pode assumir que no máximo um jogador venceu.
+- Uma linha só de `'.'` não é vitória de ninguém.
 - É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
 
 Testes:
-- `[[0,0,0],[0,1,0],[0,0,0]]→[[0,1,0],[1,1,1],[0,1,0]]`
-- `[[1,0,0,0]]→[[1,1,0,0]]`
-- `[[1,2],[0,0]]→[[1,2],[1,0]]`
-- `[[0,0],[0,0]]→[[0,0],[0,0]]`
-- `[[1,2,0],[0,2,0]]→[[1,2,0],[1,2,0]]`
+- `[['X','X','X'],['O','O','.'],['.','.','.']]→'X'`
+- `[['O','X','.'],['O','X','.'],['O','.','X']]→'O'`
+- `[['X','O','.'],['.','X','O'],['.','.','X']]→'X'`
+- `[['X','O','X'],['X','O','O'],['O','X','X']]→''`
+- `[['.','.','O'],['.','O','.'],['O','.','.']]→'O'`
+- `[['X']]→'X'`
+- `[['.','.'],['.','.']]→''`
 
 ---
 
-## Q5 — Dupla de compras
+## Q5 — Horários livres
 
-Um aplicativo de cashback oferece um bônus quando o cliente compra **exatamente dois produtos** cujos preços somam um valor-alvo. Antes de lançar a promoção, a equipe quer saber quais combinações de produtos do catálogo atingem esse valor.
+Uma secretária precisa encaixar um compromisso urgente na agenda da diretora. A agenda é uma lista de reuniões, cada uma representada por `[inicio, fim]` em horas inteiras. As reuniões já vêm **ordenadas pelo horário de início**, mas podem se **sobrepor** (a diretora às vezes é chamada para duas ao mesmo tempo).
 
-Escreva uma função chamada `pares_soma` que receba:
-- uma lista `precos` com valores inteiros, representando o catálogo;
-- um inteiro `alvo`, o valor que a dupla precisa somar.
+Escreva uma função chamada `horarios_livres` que receba:
+- a lista `reunioes`;
+- dois inteiros `abre` e `fecha`, o horário de funcionamento do escritório.
 
-A função deve retornar uma lista com **todos os pares de índices** `[i, j]` tais que `precos[i] + precos[j] == alvo`.
+A função deve retornar a lista de intervalos livres `[inicio, fim]`, em ordem, dentro do horário de funcionamento.
 
 ### Regras importantes
-- Em cada par, o primeiro índice deve ser **menor** que o segundo (`i < j`). Um produto não pode formar par com ele mesmo.
-- Os pares devem aparecer em ordem crescente de `i` e, para o mesmo `i`, em ordem crescente de `j`.
-- Produtos com o mesmo preço em posições diferentes contam como produtos diferentes.
-- Se nenhum par atingir o alvo, ou a lista estiver vazia, a função deve retornar uma lista vazia.
+- Um intervalo livre começa quando todas as reuniões anteriores terminaram e vai até o início da próxima reunião (ou até `fecha`).
+- Reuniões sobrepostas ou encostadas (uma termina às 11 e outra começa às 11) não deixam espaço livre entre elas.
+- Intervalos de tamanho zero não aparecem no resultado.
+- Todas as reuniões estão dentro do horário de funcionamento.
 
 ### Exemplo 1
 ```python
-precos = [1, 4, 3, 2]
-alvo = 5
+reunioes = [[9, 12], [10, 11], [13, 15]]
+abre, fecha = 9, 16
 ```
-Testando todos os pares:
-- `[0, 1]` → `1 + 4 = 5` ✔
-- `[0, 2]` → `1 + 3 = 4`
-- `[0, 3]` → `1 + 2 = 3`
-- `[1, 2]` → `4 + 3 = 7`
-- `[1, 3]` → `4 + 2 = 6`
-- `[2, 3]` → `3 + 2 = 5` ✔
+- Das 9 às 12 a diretora está ocupada (a reunião das 10 às 11 está dentro da primeira).
+- Das 12 às 13 está livre.
+- Das 13 às 15 está ocupada.
+- Das 15 às 16 está livre.
 
-Retorno: `[[0, 1], [2, 3]]`
+Retorno: `[[12, 13], [15, 16]]`
 
 ### Exemplo 2
 ```python
-precos = [2, 2, 2]
-alvo = 4
+reunioes = [[8, 11], [10, 12], [11, 14]]
+abre, fecha = 8, 18
 ```
-Todos os pares somam 4. Retorno: `[[0, 1], [0, 2], [1, 2]]`
+As três reuniões formam um bloco contínuo das 8 às 14. Retorno: `[[14, 18]]`
+
+### Exemplo 3
+```python
+reunioes = []
+abre, fecha = 9, 17
+```
+Retorno: `[[9, 17]]`
 
 É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
 
-Testes: `([1,4,3,2],5)→[[0,1],[2,3]]`, `([2,2,2],4)→[[0,1],[0,2],[1,2]]`, `([1,1],5)→[]`, `([],0)→[]`, `([3],6)→[]`
+Testes: `([[9,10],[12,13]],8,18)→[[8,9],[10,12],[13,18]]`, `([[8,11],[10,12],[11,14]],8,18)→[[14,18]]`, `([],9,17)→[[9,17]]`, `([[9,17]],9,17)→[]`, `([[9,12],[10,11],[13,15]],9,16)→[[12,13],[15,16]]`

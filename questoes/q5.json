@@ -1,16 +1,16 @@
 {
   "id": "q5",
   "tipo": "funcao",
-  "titulo": "Dupla de compras",
-  "enunciado": "Um aplicativo de cashback oferece um bônus quando o cliente compra **exatamente dois produtos** cujos preços somam um valor-alvo. Antes de lançar a promoção, a equipe quer saber quais combinações de produtos do catálogo atingem esse valor.\n\nEscreva uma função chamada `pares_soma` que receba:\n- uma lista `precos` com valores inteiros, representando o catálogo;\n- um inteiro `alvo`, o valor que a dupla precisa somar.\n\nA função deve retornar uma lista com **todos os pares de índices** `[i, j]` tais que `precos[i] + precos[j] == alvo`.\n\n### Regras importantes\n- Em cada par, o primeiro índice deve ser **menor** que o segundo (`i < j`). Um produto não pode formar par com ele mesmo.\n- Os pares devem aparecer em ordem crescente de `i` e, para o mesmo `i`, em ordem crescente de `j`.\n- Produtos com o mesmo preço em posições diferentes contam como produtos diferentes.\n- Se nenhum par atingir o alvo, ou a lista estiver vazia, a função deve retornar uma lista vazia.\n\n### Exemplo 1\n```python\nprecos = [1, 4, 3, 2]\nalvo = 5\n```\nTestando todos os pares:\n- `[0, 1]` → `1 + 4 = 5` ✔\n- `[0, 2]` → `1 + 3 = 4`\n- `[0, 3]` → `1 + 2 = 3`\n- `[1, 2]` → `4 + 3 = 7`\n- `[1, 3]` → `4 + 2 = 6`\n- `[2, 3]` → `3 + 2 = 5` ✔\n\nRetorno: `[[0, 1], [2, 3]]`\n\n### Exemplo 2\n```python\nprecos = [2, 2, 2]\nalvo = 4\n```\nTodos os pares somam 4. Retorno: `[[0, 1], [0, 2], [1, 2]]`\n\nÉ proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.",
-  "funcao": "pares_soma",
-  "template": "def pares_soma(precos, alvo):\n    pass\n",
+  "titulo": "Horários livres",
+  "enunciado": "Uma secretária precisa encaixar um compromisso urgente na agenda da diretora. A agenda é uma lista de reuniões, cada uma representada por `[inicio, fim]` em horas inteiras. As reuniões já vêm **ordenadas pelo horário de início**, mas podem se **sobrepor** (a diretora às vezes é chamada para duas ao mesmo tempo).\n\nEscreva uma função chamada `horarios_livres` que receba:\n- a lista `reunioes`;\n- dois inteiros `abre` e `fecha`, o horário de funcionamento do escritório.\n\nA função deve retornar a lista de intervalos livres `[inicio, fim]`, em ordem, dentro do horário de funcionamento.\n\n### Regras importantes\n- Um intervalo livre começa quando todas as reuniões anteriores terminaram e vai até o início da próxima reunião (ou até `fecha`).\n- Reuniões sobrepostas ou encostadas (uma termina às 11 e outra começa às 11) não deixam espaço livre entre elas.\n- Intervalos de tamanho zero não aparecem no resultado.\n- Todas as reuniões estão dentro do horário de funcionamento.\n\n### Exemplo 1\n```python\nreunioes = [[9, 12], [10, 11], [13, 15]]\nabre, fecha = 9, 16\n```\n- Das 9 às 12 a diretora está ocupada (a reunião das 10 às 11 está dentro da primeira).\n- Das 12 às 13 está livre.\n- Das 13 às 15 está ocupada.\n- Das 15 às 16 está livre.\n\nRetorno: `[[12, 13], [15, 16]]`\n\n### Exemplo 2\n```python\nreunioes = [[8, 11], [10, 12], [11, 14]]\nabre, fecha = 8, 18\n```\nAs três reuniões formam um bloco contínuo das 8 às 14. Retorno: `[[14, 18]]`\n\n### Exemplo 3\n```python\nreunioes = []\nabre, fecha = 9, 17\n```\nRetorno: `[[9, 17]]`\n\nÉ proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.",
+  "funcao": "horarios_livres",
+  "template": "def horarios_livres(reunioes, abre, fecha):\n    pass\n",
   "proibido": ["min", "max", "sum", "sorted", "filter", "map"],
   "testes": [
-    {"args": [[1, 4, 3, 2], 5], "esperado": [[0, 1], [2, 3]]},
-    {"args": [[2, 2, 2], 4], "esperado": [[0, 1], [0, 2], [1, 2]]},
-    {"args": [[1, 1], 5], "esperado": []},
-    {"args": [[], 0], "esperado": []},
-    {"args": [[3], 6], "esperado": []}
+    {"args": [[[9, 10], [12, 13]], 8, 18], "esperado": [[8, 9], [10, 12], [13, 18]]},
+    {"args": [[[8, 11], [10, 12], [11, 14]], 8, 18], "esperado": [[14, 18]]},
+    {"args": [[], 9, 17], "esperado": [[9, 17]]},
+    {"args": [[[9, 17]], 9, 17], "esperado": []},
+    {"args": [[[9, 12], [10, 11], [13, 15]], 9, 16], "esperado": [[12, 13], [15, 16]]}
   ]
 }

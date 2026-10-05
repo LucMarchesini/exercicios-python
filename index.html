@@ -111,7 +111,7 @@
   }
   th, td { padding: 10px 12px; border-bottom: 1px solid var(--borda); vertical-align: top; }
   tbody tr:last-child td { border-bottom: none; }
-  td:first-child { color: var(--suave); width: 1%; }
+  #testes td:first-child { color: var(--suave); width: 1%; }
   td.res { width: 1%; text-align: center; font-size: 20px; line-height: 1.1; }
   td code { font: 13px/1.5 ui-monospace, Consolas, monospace; word-break: break-word; }
   tr.teste.feito { cursor: pointer; }
@@ -145,6 +145,9 @@
     margin: 0 0 14px; padding: 12px 14px; border-radius: 8px; overflow-x: auto;
     background: var(--codigo-bg); border: 1px solid var(--borda);
   }
+  #enunciado .md-tabela { overflow-x: auto; margin: 0 0 14px; }
+  #enunciado .md-tabela table { width: auto; min-width: 60%; font-size: 14px; }
+  #enunciado .md-tabela th, #enunciado .md-tabela td { padding: 7px 12px; white-space: nowrap; }
   #enunciado pre code { background: none; color: var(--texto); padding: 0; font-size: 13px; line-height: 1.55; }
 
   /* celular */
@@ -231,7 +234,7 @@ def _testa_funcao(codigo, q, t):
         for i, (arg, original) in enumerate(zip(args, t["args"])):
             if arg != original:
                 nome = nomes[i] if i < len(nomes) else "argumento"
-                return False, repr(obtido), f"O {nome} original foi alterado"
+                return False, repr(obtido), f"O argumento original ({nome}) foi alterado"
     return obtido == t["esperado"], repr(obtido), None
 
 def _testa_programa(codigo, q, t):
@@ -298,8 +301,10 @@ const editor = CodeMirror.fromTextArea($("editor"), {
 let questoes = [], atual = null, worker = null, pronto = false, execucao = null;
 
 // ---------- armazenamento ----------
-const ler = (k) => localStorage.getItem("mpl:" + k);
-const gravar = (k, v) => localStorage.setItem("mpl:" + k, v);
+const CHAVE = "mpl2:";  // trocar a chave descarta o progresso de versões anteriores das questões
+Object.keys(localStorage).filter((k) => k.startsWith("mpl:")).forEach((k) => localStorage.removeItem(k));
+const ler = (k) => localStorage.getItem(CHAVE + k);
+const gravar = (k, v) => localStorage.setItem(CHAVE + k, v);
 
 // ---------- utilidades ----------
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -322,6 +327,14 @@ function markdown(md) {
       const codigo = [];
       while (++i < linhas.length && !linhas[i].trimStart().startsWith("```")) codigo.push(linhas[i]);
       out.push(`<pre><code>${esc(codigo.join("\n"))}</code></pre>`);
+    } else if (l.trim().startsWith("|")) {
+      fecharPara(); fecharListas(-1);
+      const celulas = (x) => x.trim().replace(/^\||\|$/g, "").split("|").map((c) => inline(c.trim()));
+      const cab = celulas(l), corpo = [];
+      if (i + 1 < linhas.length && /^\s*\|?[\s:|-]+$/.test(linhas[i + 1])) i++;
+      while (i + 1 < linhas.length && linhas[i + 1].trim().startsWith("|")) corpo.push(celulas(linhas[++i]));
+      out.push(`<div class="md-tabela"><table><thead><tr>${cab.map((c) => `<th>${c}</th>`).join("")}</tr></thead><tbody>` +
+        corpo.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("") + "</tbody></table></div>");
     } else if ((m = l.match(/^(#{1,6})\s+(.*)/))) {
       fecharPara(); fecharListas(-1);
       out.push(`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`);
@@ -392,8 +405,8 @@ editor.on("change", () => { if (atual) gravar("codigo:" + atual.id, editor.getVa
 
 $("resetar").onclick = () => {
   if (!atual || execucao || !confirm("Apagar seu código e voltar ao template?")) return;
-  localStorage.removeItem("mpl:codigo:" + atual.id);
-  localStorage.removeItem("mpl:status:" + atual.id);
+  localStorage.removeItem(CHAVE + "codigo:" + atual.id);
+  localStorage.removeItem(CHAVE + "status:" + atual.id);
   abrir(atual);
 };
 
@@ -449,7 +462,8 @@ function preencher(tr, ok, obtido, erro) {
     recebido = erro ? null : pre([{ t: obtido }]);
   } else {
     const d = diffLinhas(t.saida.map((l) => l.trim()), obtido ? obtido.split("\n") : []);
-    esperado = pre(d.e.length ? d.e : [{ t: "(nenhuma linha)", c: "vazio" }]);
+    const linhasEsp = erro ? d.e.map((l) => ({ t: l.t })) : d.e;  // com erro não há comparação a destacar
+    esperado = pre(linhasEsp.length ? linhasEsp : [{ t: "(nenhuma linha)", c: "vazio" }]);
     recebido = erro ? null : pre(d.r.length ? d.r : [{ t: "(nenhuma linha)", c: "vazio" }]);
     aviso = erro ? "" : d.aviso;
   }
