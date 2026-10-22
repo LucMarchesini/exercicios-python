@@ -1,1 +1,4 @@
-["q1", "q2", "q3", "q4", "q5"]
+[
+  {"secao": "Listas e loops", "ids": ["q1", "q2", "q3", "q4", "q5"]},
+  {"secao": "Dicionários", "ids": ["q6", "q7", "q8", "q9", "q10"]}
+]

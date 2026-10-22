@@ -1,0 +1,16 @@
+{
+  "id": "q9",
+  "tipo": "funcao",
+  "titulo": "Alunos em risco",
+  "enunciado": "A coordenação guarda o boletim em um dicionário **aninhado**: cada chave é o nome de um aluno, e o valor é outro dicionário em que cada chave é uma matéria e o valor é a lista de notas do aluno nela.\n\nOs professores, porém, querem ver o problema pelo outro lado: **para cada matéria, quais alunos estão em risco**. Um aluno está em risco em uma matéria quando a média das notas dele nela é **menor que 5**.\n\nEscreva uma função chamada `alunos_em_risco` que recebe o boletim e retorna um dicionário em que cada chave é uma matéria e o valor é a lista de alunos em risco nela.\n\n### Regras importantes\n- Só aparecem no resultado matérias com pelo menos um aluno em risco.\n- Os alunos de cada lista aparecem na mesma ordem em que estão no boletim.\n- Cada aluno tem pelo menos uma nota em cada matéria que cursa. Alunos diferentes podem cursar matérias diferentes.\n- O boletim não pode ser modificado.\n\n### Exemplo de raciocínio\n```python\nboletim = {\n    'Ana':  {'calc': [4, 5, 3], 'prog': [8, 9]},\n    'Bia':  {'calc': [6, 6],    'prog': [4, 5.5]},\n    'Caio': {'calc': [2, 9],    'fis':  [5, 5]}\n}\n```\n| Aluno | Matéria | Média | Em risco? |\n|---|---|---|---|\n| Ana | calc | 4.0 | sim |\n| Ana | prog | 8.5 | não |\n| Bia | calc | 6.0 | não |\n| Bia | prog | 4.75 | sim |\n| Caio | calc | 5.5 | não |\n| Caio | fis | 5.0 | não (5 não é menor que 5) |\n\nRetorno: `{'calc': ['Ana'], 'prog': ['Bia']}`\n\n### Exemplo 2\n```python\nboletim = {'Ana': {'calc': [4, 4]}, 'Bia': {'calc': [3], 'fis': [6]}}\n```\nRetorno: `{'calc': ['Ana', 'Bia']}`\n\nÉ proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.",
+  "funcao": "alunos_em_risco",
+  "template": "def alunos_em_risco(boletim):\n    pass\n",
+  "nao_altera_args": true,
+  "proibido": ["min", "max", "sum", "sorted", "filter", "map"],
+  "testes": [
+    {"args":[{"Ana":{"calc":[4,5,3],"prog":[8,9]},"Bia":{"calc":[6,6],"prog":[4,5.5]},"Caio":{"calc":[2,9],"fis":[5,5]}}],"esperado":{"calc":["Ana"],"prog":["Bia"]}},
+    {"args":[{"Ana":{"calc":[4,4]},"Bia":{"calc":[3],"fis":[6]}}],"esperado":{"calc":["Ana","Bia"]}},
+    {"args":[{"Ana":{"calc":[10]}}],"esperado":{}},
+    {"args":[{}],"esperado":{}}
+  ]
+}

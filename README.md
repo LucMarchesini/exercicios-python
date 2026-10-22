@@ -12,7 +12,7 @@ Abra <http://localhost:8000>. (Abrir o `index.html` direto do disco não funcion
 
 ## Adicionar questões
 
-Crie `questoes/qN.json` e coloque o id em `questoes/index.json`. Formatos:
+Crie `questoes/qN.json` e coloque o id na seção certa de `questoes/index.json` (`[{"secao": "...", "ids": [...]}]`). Formatos:
 
 - `"tipo": "funcao"` — `funcao`, `template`, `testes: [{"args": [...], "esperado": ...}]`
 - `"tipo": "programa"` — `template`, `testes: [{"entradas": [...], "saida": [...]}]`
