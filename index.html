@@ -81,7 +81,7 @@
   /* ---------- estrutura ---------- */
   .corpo { flex: 1; min-height: 0; display: flex; }
   #area {
-    flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(280px, var(--split, 50%)) 9px minmax(340px, 1fr);
+    flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(280px, var(--split, 42%)) 9px minmax(340px, 1fr);
   }
   #painel-enunciado, #painel-codigo { min-width: 0; overflow-y: auto; }
   #painel-enunciado { background: var(--painel); }
@@ -89,7 +89,7 @@
 
   /* ---------- barra lateral ---------- */
   #lista {
-    width: 272px; flex-shrink: 0; overflow-y: auto; padding: 14px 10px 24px;
+    width: 248px; flex-shrink: 0; overflow-y: auto; padding: 14px 10px 24px;
     background: var(--painel-2); border-right: 1px solid var(--borda);
   }
   .secao + .secao { margin-top: 10px; }
@@ -187,7 +187,8 @@
     border: 1px solid var(--borda-forte); border-bottom-width: 2px; background: var(--painel-2); color: var(--suave);
   }
   .CodeMirror {
-    height: clamp(260px, 48vh, 620px); padding: 6px 0; background: var(--ed-bg); color: var(--ed-texto);
+    /* no desktop o editor ocupa a altura da tela; os resultados ficam logo abaixo */
+    height: max(360px, calc(100vh - var(--topo-h) - 190px)); padding: 6px 0; background: var(--ed-bg); color: var(--ed-texto);
     font: 14px/1.6 var(--mono);
   }
   .CodeMirror-gutters { background: var(--ed-gutter); border-right: 1px solid var(--borda); }
@@ -307,6 +308,7 @@
     #painel-enunciado { border-bottom: 1px solid var(--borda); }
     .leitura { padding: 22px 16px 28px; }
     #painel-codigo { padding: 16px 16px 40px; }
+    .CodeMirror { height: max(340px, 65vh); }
     #titulo { font-size: 23px; }
     #enunciado { font-size: 15.5px; }
   }
@@ -316,7 +318,7 @@
     .progresso { gap: 8px; font-size: 12px; }
     .progresso .curto { display: inline; }
     .progresso .longo { display: none; }
-    .CodeMirror { font-size: 13px; height: 300px; }
+    .CodeMirror { font-size: 13px; }
     #rodar { flex: 1; }
     .editor-cab .dica, #rodar kbd { display: none; }
     .nota-grande { font-size: 34px; }
@@ -695,10 +697,10 @@ document.addEventListener("keydown", (e) => {
   const soltar = () => { div.classList.remove("arrastando"); document.body.classList.remove("arrastando"); };
   div.addEventListener("pointerup", soltar);
   div.addEventListener("pointercancel", soltar);
-  div.addEventListener("dblclick", () => { aplicar(50); gravar("split", 50); });
+  div.addEventListener("dblclick", () => { aplicar(42); gravar("split", 42); });
   div.addEventListener("keydown", (e) => {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-    const atualPct = parseFloat(ler("split")) || 50;
+    const atualPct = parseFloat(ler("split")) || 42;
     const pct = Math.min(75, Math.max(25, atualPct + (e.key === "ArrowLeft" ? -2 : 2)));
     aplicar(pct);
     gravar("split", pct);
@@ -872,17 +874,31 @@ $("rodar").onclick = () => {
   if (!pronto || execucao || !atual) return;
   execucao = { q: atual, linhas: cartoesTestes(atual), acertos: 0, corrente: 0, timer: null };
   estadoBotao();
+  $("resumo").scrollIntoView({ block: "nearest", behavior: "smooth" });
   execucao.timer = setTimeout(estourouTempo, TIMEOUT_MS);
   worker.postMessage({ codigo: editor.getValue(), questao: JSON.stringify(atual) });
 };
 
 // ---------- início ----------
 (async () => {
-  const indice = await (await fetch("questoes/index.json")).json();
-  secoes = await Promise.all(indice.map(async (s) => ({
-    nome: s.secao,
-    questoes: await Promise.all(s.ids.map(async (id) => (await fetch(`questoes/${id}.json`)).json())),
-  })));
+  // no-cache: o GitHub Pages manda cache de 10 min, e um index.json antigo não pode quebrar a página
+  const json = async (url) => {
+    const r = await fetch(url, { cache: "no-cache" });
+    if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`);
+    return r.json();
+  };
+  try {
+    let indice = await json("questoes/index.json");
+    if (typeof indice[0] === "string") indice = [{ secao: "Questões", ids: indice }];  // formato antigo: lista de ids
+    secoes = await Promise.all(indice.map(async (s) => ({
+      nome: s.secao,
+      questoes: await Promise.all(s.ids.map((id) => json(`questoes/${id}.json`))),
+    })));
+  } catch (e) {
+    $("titulo").textContent = "Não foi possível carregar as questões";
+    $("enunciado").innerHTML = `<p>Recarregue a página (Ctrl+Shift+R). Detalhe: <code>${esc(e.message)}</code></p>`;
+    return;
+  }
   questoes = secoes.flatMap((s) => s.questoes);
   abrir(questoes.find((q) => q.id === ler("atual")) || questoes[0]);
   iniciarWorker();
