@@ -380,15 +380,37 @@
 <script type="text/python" id="harness">
 import ast, inspect, json, copy, io, contextlib, traceback, js
 
+def _construcao(no):
+    # chave de "construcoes_proibidas" usada pelo nó, se houver
+    if isinstance(no, ast.Tuple) and isinstance(no.ctx, ast.Load):
+        return "tupla"  # desempacotar (for k, v in d.items()) continua permitido
+    if isinstance(no, (ast.Set, ast.SetComp)):
+        return "set"
+    if isinstance(no, (ast.ListComp, ast.DictComp, ast.GeneratorExp)):
+        return "list comprehension"
+    if isinstance(no, ast.Lambda):
+        return "lambda"
+    if isinstance(no, (ast.Try, getattr(ast, "TryStar", ast.Try))):
+        return "try/except"
+    if isinstance(no, (ast.Import, ast.ImportFrom)):
+        return "import"
+    return None
+
 def _uso_proibido(codigo, q):
     try:
         arvore = ast.parse(codigo)
     except SyntaxError:
         return None  # o erro de sintaxe aparece nos testes
     proibidos = set(q.get("proibido", []))
+    metodos = set(q.get("metodos_proibidos", []))
+    construcoes = set(q.get("construcoes_proibidas", []))
     for no in ast.walk(arvore):
         if isinstance(no, ast.Name) and no.id in proibidos:
             return f"Uso proibido: {no.id} (linha {no.lineno})"
+        if isinstance(no, ast.Attribute) and no.attr in metodos:
+            return f"Uso proibido: {no.attr} (linha {no.lineno})"
+        if _construcao(no) in construcoes:
+            return f"Uso proibido: {_construcao(no)} (linha {no.lineno})"
         if "str" in proibidos and (
             isinstance(no, ast.JoinedStr)
             or (isinstance(no, ast.Name) and no.id in ("repr", "format"))

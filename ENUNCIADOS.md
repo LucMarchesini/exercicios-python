@@ -1,6 +1,16 @@
-# Enunciados completos (substituem os anteriores)
+# Enunciados: Listas e loops (Q1 a Q5)
 
-Instruções para o Claude Code: substitua as 5 questões por estas. Atualize `titulo`, `funcao`, `tipo`, `enunciado`, `template`, `testes` e `proibido` de cada `questoes/qN.json`. Renderize o enunciado como markdown. Em **todas** as questões, `proibido` = `min, max, sum, sorted, filter, map`. A Q1 tem `nao_altera_args`. Remova as flags antigas (`sem_fatiamento`, `str` proibido) que não se aplicam mais. Valide com soluções de referência e apague-as.
+Os alunos só viram: introdução; operações matemáticas, variáveis e funções; `print`, `input`, `int`, `float`; `if/elif/else`; `while`; listas; `for` (incluindo `range`); dicionários. Nenhuma questão exige algo fora disso. Strings aparecem só como valores inteiros: comparadas com `==`/`!=`, usadas como chave, guardadas em listas, impressas e concatenadas com `+` ou f-string.
+
+Em todos os `questoes/qN.json`:
+- `proibido` = `min, max, sum, sorted, filter, map, enumerate, zip, tuple, set`
+- `metodos_proibidos` = `split, join, upper, lower, strip, replace, find, index, count` (a Q1 também proíbe `copy`)
+- `construcoes_proibidas` = `tupla, set, list comprehension, lambda, try/except, import`
+- `sem_fatiamento` = `true`
+
+O código é barrado (nota 0) com a mensagem `Uso proibido: X (linha N)`.
+
+Q1 e Q2 têm `nao_altera_args`.
 
 ---
 
@@ -44,57 +54,69 @@ print(pulos_ate_sair([]))                # 0
 
 ### Restrições e observações
 - Se a lista estiver vazia, o sapo já começa fora e a resposta é `0`.
-- **A lista recebida não pode ser modificada**: trabalhe em uma cópia.
-- É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
+- **A lista recebida não pode ser modificada**: trabalhe em uma cópia, criada com `for` e `append`.
+- **Proibido:** `min`, `max`, `sum`, `sorted`, `filter`, `map`, `enumerate`, `zip`, os métodos `split`, `join`, `upper`, `lower`, `strip`, `replace`, `find`, `index` e `count`, fatiamento (`x[a:b]`), tuplas, sets, list comprehension, `lambda`, `try/except` e `import`.
 
-Testes: `[0,3,0,1,-3]→5`, `[1]→1`, `[5]→1`, `[]→0`, `[2,-1,-1]→4`, `[0]→2`
+Testes:
+- `pulos_ate_sair([0, 3, 0, 1, -3])` → `5`
+- `pulos_ate_sair([1])` → `1`
+- `pulos_ate_sair([5])` → `1`
+- `pulos_ate_sair([])` → `0`
+- `pulos_ate_sair([2, -1, -1])` → `4`
+- `pulos_ate_sair([0])` → `2`
 
 ---
 
-## Q2 — Mensagem secreta
+## Q2 — Esperando o calor
 
-Dois amigos trocam mensagens cifradas usando uma variação da **Cifra de César**. Em vez de deslocar todas as letras pela mesma quantidade, eles usam uma **lista de chaves** que se repete ao longo da mensagem.
+Uma estação meteorológica anota a temperatura máxima de cada dia em uma lista de inteiros. Quem está planejando uma ida à praia quer saber, **para cada dia**, quantos dias ainda vai ter que esperar até chegar um dia **mais quente** que ele.
 
-Escreva uma função chamada `cifra` que receba:
-- uma string `texto` com letras minúsculas sem acento e outros caracteres (espaços, pontuação);
-- uma lista `chaves` de inteiros, com pelo menos um elemento.
+Escreva uma função chamada `dias_ate_esquentar` que recebe a lista `temperaturas` e retorna uma **nova lista**, do mesmo tamanho, em que a posição `i` contém quantos dias depois do dia `i` vem o primeiro dia com temperatura **maior** que a dele. Se nenhum dia depois for mais quente, a posição recebe `0`.
 
-A função deve retornar o texto cifrado.
+A função deve operar da seguinte forma:
 
-### Regras importantes
-- Use o alfabeto `'abcdefghijklmnopqrstuvwxyz'`.
-- A 1ª **letra** do texto é deslocada por `chaves[0]`, a 2ª letra por `chaves[1]`, e assim por diante. Quando as chaves acabam, recomeça do início.
-- O alfabeto é **circular**: depois do `z` vem o `a`. Chaves negativas deslocam para trás.
-- Caracteres que não são letras são mantidos como estão e **não consomem chave**.
+1. Comece com uma lista de resposta vazia.
+2. Para cada dia `i`:
+   1. Procure, a partir do dia `i + 1`, o primeiro dia `j` com temperatura maior que a do dia `i`.
+   2. Se encontrar, adicione `j - i` à resposta; senão, adicione `0`.
+3. Retorne a resposta.
 
-### Exemplo 1
+### Exemplo de raciocínio
+Considere `[23, 24, 25, 21, 19, 22, 26, 23]`.
+
+| Dia | Temperatura | Primeiro dia mais quente | Espera |
+|---|---|---|---|
+| 0 | 23 | dia 1 (24) | 1 |
+| 1 | 24 | dia 2 (25) | 1 |
+| 2 | 25 | dia 6 (26) | 4 |
+| 3 | 21 | dia 5 (22) | 2 |
+| 4 | 19 | dia 5 (22) | 1 |
+| 5 | 22 | dia 6 (26) | 1 |
+| 6 | 26 | nenhum | 0 |
+| 7 | 23 | nenhum | 0 |
+
+Retorno: `[1, 1, 4, 2, 1, 1, 0, 0]`
+
+### Exemplos
 ```python
-texto = 'ola mundo'
-chaves = [1, 2]
+print(dias_ate_esquentar([30, 40, 50, 60]))  # [1, 1, 1, 0]
+print(dias_ate_esquentar([20, 20, 21]))      # [2, 1, 0]
+print(dias_ate_esquentar([]))                # []
 ```
-- `o` +1 → `p`, `l` +2 → `n`, `a` +1 → `b`
-- o espaço é mantido e não consome chave
-- `m` +2 → `o`, `u` +1 → `v`, `n` +2 → `p`, `d` +1 → `e`, `o` +2 → `q`
 
-Retorno: `'pnb ovpeq'`
+### Restrições e observações
+- Uma temperatura **igual** não conta como mais quente.
+- A lista recebida não pode ser modificada.
+- **Proibido:** `min`, `max`, `sum`, `sorted`, `filter`, `map`, `enumerate`, `zip`, os métodos `split`, `join`, `upper`, `lower`, `strip`, `replace`, `find`, `index` e `count`, fatiamento (`x[a:b]`), tuplas, sets, list comprehension, `lambda`, `try/except` e `import`.
 
-### Exemplo 2
-```python
-texto = 'zebra!'
-chaves = [3]
-```
-O `z` +3 dá a volta no alfabeto e vira `c`. O `!` é mantido. Retorno: `'cheud!'`
-
-### Exemplo 3
-```python
-texto = 'python'
-chaves = [-1]
-```
-Retorno: `'oxsgnm'`
-
-É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
-
-Testes: `('abc',[1])→'bcd'`, `('ola mundo',[1,2])→'pnb ovpeq'`, `('zebra!',[3])→'cheud!'`, `('a b',[0,25])→'a a'`, `('python',[-1])→'oxsgnm'`, `('',[5])→''`
+Testes:
+- `dias_ate_esquentar([23, 24, 25, 21, 19, 22, 26, 23])` → `[1, 1, 4, 2, 1, 1, 0, 0]`
+- `dias_ate_esquentar([30, 40, 50, 60])` → `[1, 1, 1, 0]`
+- `dias_ate_esquentar([50, 40, 30])` → `[0, 0, 0]`
+- `dias_ate_esquentar([20, 20, 21])` → `[2, 1, 0]`
+- `dias_ate_esquentar([25])` → `[0]`
+- `dias_ate_esquentar([])` → `[]`
+- `dias_ate_esquentar([18, 30, 18, 25, 18, 31])` → `[1, 4, 1, 2, 1, 0]`
 
 ---
 
@@ -102,41 +124,48 @@ Testes: `('abc',[1])→'bcd'`, `('ola mundo',[1,2])→'pnb ovpeq'`, `('zebra!',[
 
 Você está construindo um editor de texto minimalista, controlado por comandos digitados. O diferencial dele é o comando **desfazer**, que reverte a última alteração feita, quantas vezes o usuário quiser.
 
-Escreva um programa que pergunte repetidamente `Comando: ` e execute o que foi pedido. O texto começa vazio e é formado por uma sequência de palavras.
+Escreva um programa que pergunte repetidamente `Comando: ` e execute o que foi pedido. O texto é uma **lista de palavras** e começa vazio.
 
 ### Comandos
-- `escrever PALAVRA`: adiciona `PALAVRA` ao final do texto.
-- `apagar`: remove a última palavra do texto. Se o texto estiver vazio, imprime `"nada para apagar"`.
-- `desfazer`: reverte a última alteração (`escrever` ou `apagar`) que ainda não foi desfeita. Se não houver nada para desfazer, imprime `"nada para desfazer"`.
-- `mostrar`: imprime o texto atual, com as palavras separadas por espaço, ou `"(vazio)"` se não houver palavras.
+- `escrever`: pergunta `Palavra: ` e adiciona a palavra digitada ao final da lista.
+- `apagar`: remove a última palavra da lista. Se a lista estiver vazia, imprime `nada para apagar`.
+- `desfazer`: reverte a última alteração (`escrever` ou `apagar`) que ainda não foi desfeita. Se não houver nada para desfazer, imprime `nada para desfazer`.
+- `mostrar`: imprime a lista de palavras (com `print(lista)`).
 - `fim`: encerra o programa.
 
-Qualquer outra entrada, inclusive `escrever` sem palavra ou com mais de uma palavra, imprime `"comando invalido"`.
+Qualquer outro comando imprime `comando invalido`.
 
 ### Operações
 Cada `escrever`, `apagar` ou `desfazer` **bem-sucedido** conta como uma operação. Comandos que imprimiram mensagem de erro, `mostrar` e `fim` não contam.
 
-Desfazer um `apagar` devolve a palavra apagada ao final do texto. Um `desfazer` não pode ser desfeito.
+Desfazer um `apagar` devolve a palavra apagada ao final da lista. Um `desfazer` não pode ser desfeito.
 
 ### Encerramento
-Ao digitar `fim`, o programa imprime `"texto final: T (N operacoes)"`, em que `T` é o texto atual (ou `(vazio)`) e `N` o total de operações.
+Ao digitar `fim`, o programa imprime duas linhas: `texto final:` seguido da lista, e `operacoes:` seguido do total de operações. Por exemplo:
+```python
+print('texto final:', palavras)
+print('operacoes:', total)
+```
 
 ### Exemplo 1
 ```
-> Comando: escrever a
-> Comando: escrever b
+> Comando: escrever
+> Palavra: a
+> Comando: escrever
+> Palavra: b
 > Comando: apagar
 > Comando: mostrar
-a
+['a']
 > Comando: desfazer
 > Comando: mostrar
-a b
+['a', 'b']
 > Comando: desfazer
 > Comando: desfazer
 > Comando: mostrar
-(vazio)
+[]
 > Comando: fim
-texto final: (vazio) (6 operacoes)
+texto final: []
+operacoes: 6
 ```
 
 ### Exemplo 2
@@ -148,17 +177,18 @@ nada para desfazer
 > Comando: pular
 comando invalido
 > Comando: fim
-texto final: (vazio) (0 operacoes)
+texto final: []
+operacoes: 0
 ```
 
-É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
+**Proibido:** `min`, `max`, `sum`, `sorted`, `filter`, `map`, `enumerate`, `zip`, os métodos `split`, `join`, `upper`, `lower`, `strip`, `replace`, `find`, `index` e `count`, fatiamento (`x[a:b]`), tuplas, sets, list comprehension, `lambda`, `try/except` e `import`.
 
-Testes (entradas → saída):
-- `escrever ola, escrever mundo, mostrar, fim` → `ola mundo` / `texto final: ola mundo (2 operacoes)`
-- `fim` → `texto final: (vazio) (0 operacoes)`
-- `apagar, desfazer, pular, escrever, fim` → `nada para apagar` / `nada para desfazer` / `comando invalido` / `comando invalido` / `texto final: (vazio) (0 operacoes)`
-- `escrever a, escrever b, apagar, mostrar, desfazer, mostrar, desfazer, desfazer, mostrar, fim` → `a` / `a b` / `(vazio)` / `texto final: (vazio) (6 operacoes)`
-- `escrever x, escrever y, apagar, apagar, desfazer, escrever z, fim` → `texto final: x z (6 operacoes)`
+Testes:
+- entradas `escrever, ola, escrever, mundo, mostrar, fim` → `['ola', 'mundo']` / `texto final: ['ola', 'mundo']` / `operacoes: 2`
+- entradas `fim` → `texto final: []` / `operacoes: 0`
+- entradas `apagar, desfazer, pular, fim` → `nada para apagar` / `nada para desfazer` / `comando invalido` / `texto final: []` / `operacoes: 0`
+- entradas `escrever, a, escrever, b, apagar, mostrar, desfazer, mostrar, desfazer, desfazer, mostrar, fim` → `['a']` / `['a', 'b']` / `[]` / `texto final: []` / `operacoes: 6`
+- entradas `escrever, x, escrever, y, apagar, apagar, desfazer, escrever, z, fim` → `texto final: ['x', 'z']` / `operacoes: 6`
 
 ---
 
@@ -202,16 +232,16 @@ Tabuleiro cheio, mas nenhuma linha, coluna ou diagonal completa. Retorno: `''`
 - O tabuleiro tem pelo menos uma casa e é sempre quadrado.
 - Você pode assumir que no máximo um jogador venceu.
 - Uma linha só de `'.'` não é vitória de ninguém.
-- É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
+- **Proibido:** `min`, `max`, `sum`, `sorted`, `filter`, `map`, `enumerate`, `zip`, os métodos `split`, `join`, `upper`, `lower`, `strip`, `replace`, `find`, `index` e `count`, fatiamento (`x[a:b]`), tuplas, sets, list comprehension, `lambda`, `try/except` e `import`.
 
 Testes:
-- `[['X','X','X'],['O','O','.'],['.','.','.']]→'X'`
-- `[['O','X','.'],['O','X','.'],['O','.','X']]→'O'`
-- `[['X','O','.'],['.','X','O'],['.','.','X']]→'X'`
-- `[['X','O','X'],['X','O','O'],['O','X','X']]→''`
-- `[['.','.','O'],['.','O','.'],['O','.','.']]→'O'`
-- `[['X']]→'X'`
-- `[['.','.'],['.','.']]→''`
+- `vencedor([['X', 'X', 'X'], ['O', 'O', '.'], ['.', '.', '.']])` → `'X'`
+- `vencedor([['O', 'X', '.'], ['O', 'X', '.'], ['O', '.', 'X']])` → `'O'`
+- `vencedor([['X', 'O', '.'], ['.', 'X', 'O'], ['.', '.', 'X']])` → `'X'`
+- `vencedor([['X', 'O', 'X'], ['X', 'O', 'O'], ['O', 'X', 'X']])` → `''`
+- `vencedor([['.', '.', 'O'], ['.', 'O', '.'], ['O', '.', '.']])` → `'O'`
+- `vencedor([['X']])` → `'X'`
+- `vencedor([['.', '.'], ['.', '.']])` → `''`
 
 ---
 
@@ -257,6 +287,11 @@ abre, fecha = 9, 17
 ```
 Retorno: `[[9, 17]]`
 
-É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
+**Proibido:** `min`, `max`, `sum`, `sorted`, `filter`, `map`, `enumerate`, `zip`, os métodos `split`, `join`, `upper`, `lower`, `strip`, `replace`, `find`, `index` e `count`, fatiamento (`x[a:b]`), tuplas, sets, list comprehension, `lambda`, `try/except` e `import`.
 
-Testes: `([[9,10],[12,13]],8,18)→[[8,9],[10,12],[13,18]]`, `([[8,11],[10,12],[11,14]],8,18)→[[14,18]]`, `([],9,17)→[[9,17]]`, `([[9,17]],9,17)→[]`, `([[9,12],[10,11],[13,15]],9,16)→[[12,13],[15,16]]`
+Testes:
+- `horarios_livres([[9, 10], [12, 13]], 8, 18)` → `[[8, 9], [10, 12], [13, 18]]`
+- `horarios_livres([[8, 11], [10, 12], [11, 14]], 8, 18)` → `[[14, 18]]`
+- `horarios_livres([], 9, 17)` → `[[9, 17]]`
+- `horarios_livres([[9, 17]], 9, 17)` → `[]`
+- `horarios_livres([[9, 12], [10, 11], [13, 15]], 9, 16)` → `[[12, 13], [15, 16]]`

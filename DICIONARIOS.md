@@ -1,13 +1,23 @@
-# Novas questões: Dicionários (Q6 a Q10)
+# Enunciados: Dicionários (Q6 a Q10)
 
-Instruções para o Claude Code: **adicione** estas questões como `questoes/q6.json` a `q10.json`, sem mexer nas Q1–Q5. Na sidebar, agrupe as questões em duas seções: "Listas e loops" (Q1–Q5) e "Dicionários" (Q6–Q10). Em todas, `proibido` = `min, max, sum, sorted, filter, map`. Q7, Q9 e Q10 têm `nao_altera_args`. Os testes comparam dicionários com `==` (a ordem das chaves não importa, a ordem dentro das listas importa). Mostre dicionários formatados no feedback de erro. Valide cada questão com uma solução correta, uma errada e uma com função proibida, apague as soluções, faça commit e push.
+Os alunos só viram: introdução; operações matemáticas, variáveis e funções; `print`, `input`, `int`, `float`; `if/elif/else`; `while`; listas; `for` (incluindo `range`); dicionários. Nenhuma questão exige algo fora disso. Strings aparecem só como valores inteiros: comparadas com `==`/`!=`, usadas como chave, guardadas em listas, impressas e concatenadas com `+` ou f-string.
+
+Em todos os `questoes/qN.json`:
+- `proibido` = `min, max, sum, sorted, filter, map, enumerate, zip, tuple, set`
+- `metodos_proibidos` = `split, join, upper, lower, strip, replace, find, index, count` (a Q1 também proíbe `copy`)
+- `construcoes_proibidas` = `tupla, set, list comprehension, lambda, try/except, import`
+- `sem_fatiamento` = `true`
+
+O código é barrado (nota 0) com a mensagem `Uso proibido: X (linha N)`.
+
+Q7, Q9 e Q10 têm `nao_altera_args`. Os testes comparam dicionários com `==` (a ordem das chaves não importa, a ordem dentro das listas importa).
 
 O que cada questão treina:
 | Questão | Conceitos |
 |---|---|
 | Q6 | criar chave sob demanda, `in`, valor como lista, acumular |
 | Q7 | dicionário como grafo, contagem com `get`, percorrer dicionário de listas |
-| Q8 | programa com `input`: inserir, atualizar, consultar, dois dicionários em paralelo, `items()` |
+| Q8 | programa com vários `input`: inserir, atualizar, consultar, dois dicionários em paralelo |
 | Q9 | dicionário aninhado, inverter a estrutura (agrupar por outra chave) |
 | Q10 | dicionário como "ponteiro", `while` seguindo chaves, dicionário de visitados para detectar ciclo |
 
@@ -15,21 +25,20 @@ O que cada questão treina:
 
 ## Q6 — Tabela do campeonato
 
-A liga de futebol do bairro anota os resultados dos jogos em textos no formato `"TimeA GolsA x GolsB TimeB"`, por exemplo `"Gatos 2 x 1 Leoes"`. No fim da rodada, alguém precisa montar a tabela de classificação à mão, e sempre erra alguma conta.
+A liga de futebol do bairro anota cada jogo como uma lista `[time_a, gols_a, gols_b, time_b]`, por exemplo `['Gatos', 2, 1, 'Leoes']` (Gatos 2 x 1 Leoes). No fim da rodada, alguém precisa montar a tabela de classificação à mão, e sempre erra alguma conta.
 
-Escreva uma função chamada `tabela` que recebe uma lista de resultados e retorna um **dicionário** em que cada chave é o nome de um time e o valor é uma lista `[pontos, saldo, gols_pro]`.
+Escreva uma função chamada `tabela` que recebe uma lista de jogos e retorna um **dicionário** em que cada chave é o nome de um time e o valor é uma lista `[pontos, saldo, gols_pro]`.
 
 ### Regras
 - Vitória vale `3` pontos, empate vale `1` para cada time e derrota vale `0`.
 - O **saldo** é a soma dos gols marcados menos a soma dos gols sofridos.
 - `gols_pro` é o total de gols marcados pelo time.
 - Todo time que aparece em pelo menos um jogo deve estar no dicionário, mesmo com `0` pontos.
-- Os nomes dos times não têm espaços. Use `texto.split(' ')` para separar as partes.
 - Se a lista estiver vazia, retorne um dicionário vazio.
 
 ### Exemplo de raciocínio
 ```python
-jogos = ['Gatos 2 x 1 Leoes', 'Leoes 0 x 0 Patos', 'Patos 3 x 3 Gatos']
+jogos = [['Gatos', 2, 1, 'Leoes'], ['Leoes', 0, 0, 'Patos'], ['Patos', 3, 3, 'Gatos']]
 ```
 | Jogo | Gatos | Leoes | Patos |
 |---|---|---|---|
@@ -44,18 +53,18 @@ Retorno:
 
 ### Exemplo 2
 ```python
-jogos = ['A 2 x 0 B', 'C 3 x 1 D']
+jogos = [['A', 2, 0, 'B'], ['C', 3, 1, 'D']]
 ```
 Retorno: `{'A': [3, 2, 2], 'B': [0, -2, 0], 'C': [3, 2, 3], 'D': [0, -2, 1]}`
 
-É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
+**Proibido:** `min`, `max`, `sum`, `sorted`, `filter`, `map`, `enumerate`, `zip`, os métodos `split`, `join`, `upper`, `lower`, `strip`, `replace`, `find`, `index` e `count`, fatiamento (`x[a:b]`), tuplas, sets, list comprehension, `lambda`, `try/except` e `import`.
 
 Testes:
-- `['Gatos 2 x 1 Leoes','Leoes 0 x 0 Patos','Patos 3 x 3 Gatos']` → `{'Gatos':[4,1,5],'Leoes':[1,-1,1],'Patos':[2,0,3]}`
-- `['A 1 x 0 B','C 2 x 1 D','B 3 x 0 C','D 1 x 0 A']` → `{'A':[3,0,1],'B':[3,2,3],'C':[3,-2,2],'D':[3,0,2]}`
-- `['A 2 x 0 B','C 3 x 1 D']` → `{'A':[3,2,2],'B':[0,-2,0],'C':[3,2,3],'D':[0,-2,1]}`
-- `['A 1 x 1 B']` → `{'A':[1,0,1],'B':[1,0,1]}`
-- `[]` → `{}`
+- `tabela([['Gatos', 2, 1, 'Leoes'], ['Leoes', 0, 0, 'Patos'], ['Patos', 3, 3, 'Gatos']])` → `{'Gatos': [4, 1, 5], 'Leoes': [1, -1, 1], 'Patos': [2, 0, 3]}`
+- `tabela([['A', 1, 0, 'B'], ['C', 2, 1, 'D'], ['B', 3, 0, 'C'], ['D', 1, 0, 'A']])` → `{'A': [3, 0, 1], 'B': [3, 2, 3], 'C': [3, -2, 2], 'D': [3, 0, 2]}`
+- `tabela([['A', 2, 0, 'B'], ['C', 3, 1, 'D']])` → `{'A': [3, 2, 2], 'B': [0, -2, 0], 'C': [3, 2, 3], 'D': [0, -2, 1]}`
+- `tabela([['A', 1, 1, 'B']])` → `{'A': [1, 0, 1], 'B': [1, 0, 1]}`
+- `tabela([])` → `{}`
 
 ---
 
@@ -101,13 +110,14 @@ Com a mesma rede e `pessoa = 'edu'`: o único amigo é `'bia'`, cujos amigos sã
 ### Exemplo 3
 `sugestoes({'x': []}, 'x')` → `{}`, pois quem não tem amigos não recebe sugestões.
 
-É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
+**Proibido:** `min`, `max`, `sum`, `sorted`, `filter`, `map`, `enumerate`, `zip`, os métodos `split`, `join`, `upper`, `lower`, `strip`, `replace`, `find`, `index` e `count`, fatiamento (`x[a:b]`), tuplas, sets, list comprehension, `lambda`, `try/except` e `import`.
 
-Testes (R é a rede do exemplo):
-- `(R,'ana')` → `{'duda':2,'edu':1}`
-- `(R,'edu')` → `{'ana':1,'duda':1}`
-- `(R,'duda')` → `{'ana':2,'edu':1}`
-- `({'x':[]},'x')` → `{}`
+Testes:
+- `sugestoes({'ana': ['bia', 'caio'], 'bia': ['ana', 'duda', 'edu'], 'caio': ['ana', 'duda'], 'duda': ['bia', 'caio'], 'edu': ['bia']}, 'ana')` → `{'duda': 2, 'edu': 1}`
+- `sugestoes({'ana': ['bia', 'caio'], 'bia': ['ana', 'duda', 'edu'], 'caio': ['ana', 'duda'], 'duda': ['bia', 'caio'], 'edu': ['bia']}, 'edu')` → `{'ana': 1, 'duda': 1}`
+- `sugestoes({'ana': ['bia', 'caio'], 'bia': ['ana', 'duda', 'edu'], 'caio': ['ana', 'duda'], 'duda': ['bia', 'caio'], 'edu': ['bia']}, 'duda')` → `{'ana': 2, 'edu': 1}`
+- `sugestoes({'x': []}, 'x')` → `{}`
+- `sugestoes({'a': ['b', 'c'], 'b': ['a', 'c', 'd'], 'c': ['a', 'b'], 'd': ['b']}, 'a')` → `{'d': 1}`
 
 ---
 
@@ -115,75 +125,105 @@ Testes (R é a rede do exemplo):
 
 A cantina da faculdade quer um sistema simples para controlar o estoque e as vendas do dia, operado por comandos digitados no caixa.
 
-Escreva um programa que pergunte repetidamente `Comando: ` e execute o que foi pedido. Guarde os produtos em um dicionário.
+Escreva um programa que pergunte repetidamente `Comando: ` e execute o que foi pedido. Guarde os produtos em um dicionário. Os preços são **inteiros, em centavos** (`450` = R$ 4,50).
 
 ### Comandos
-- `cadastrar NOME QTD PRECO`: cadastra um produto com a quantidade inicial (inteiro) e o preço unitário (decimal). Se o produto já existir, imprime `"produto ja cadastrado"` e não altera nada.
-- `vender NOME QTD`: vende `QTD` unidades.
-  - Se o produto não existir: `"produto inexistente"`.
-  - Se não houver unidades suficientes: `"estoque insuficiente: X disponiveis"`, e nada é vendido.
-  - Se a venda zerar o estoque do produto, imprime `"NOME esgotado"`.
-- `repor NOME QTD`: soma `QTD` unidades ao estoque. Se o produto não existir: `"produto inexistente"`.
-- `consultar NOME`: imprime `"NOME: X unidades a R$ P"`, com o preço em duas casas decimais. Se não existir: `"produto inexistente"`.
+Cada comando primeiro pergunta **todos** os seus dados, nesta ordem, e só depois verifica se dá para executá-lo.
+- `cadastrar`: pergunta `Produto: `, `Quantidade: ` e `Preco: `. Cadastra o produto com essa quantidade inicial e esse preço unitário. Se o produto já existir, imprime `produto ja cadastrado` e não altera nada.
+- `vender`: pergunta `Produto: ` e `Quantidade: `.
+  - Se o produto não existir: `produto inexistente`.
+  - Se não houver unidades suficientes: `estoque insuficiente: X disponiveis`, e nada é vendido.
+  - Se a venda zerar o estoque do produto, imprime `NOME esgotado`.
+- `repor`: pergunta `Produto: ` e `Quantidade: ` e soma a quantidade ao estoque. Se o produto não existir: `produto inexistente`.
+- `consultar`: pergunta `Produto: ` e imprime `NOME - X unidades a P centavos`. Se não existir: `produto inexistente`.
 - `fim`: encerra.
 
-Qualquer comando desconhecido ou com a quantidade errada de partes imprime `"comando invalido"`. Você pode assumir que quantidades e preços, quando presentes, são números válidos.
+Qualquer outro comando imprime `comando invalido`.
+
+**Dica:** `print('estoque insuficiente:', x, 'disponiveis')` imprime os valores separados por espaço.
 
 ### Encerramento
 Ao digitar `fim`, o programa imprime duas linhas:
-1. `"faturamento: R$ T"`, o total vendido no dia, com duas casas decimais.
-2. `"mais vendido: NOME (N unidades)"`, o produto com mais unidades vendidas. Em caso de empate, vale o que foi **cadastrado primeiro**. Se nenhuma venda aconteceu, imprime `"nenhuma venda"`.
+1. `faturamento: T centavos`, o total vendido no dia.
+2. `mais vendido: NOME com N unidades`, o produto com mais unidades vendidas. Em caso de empate, vale o que foi **cadastrado primeiro**. Se nenhuma venda aconteceu, imprime `nenhuma venda`.
 
 ### Exemplo 1
 ```
-> Comando: cadastrar cafe 10 4.50
-> Comando: cadastrar pao 3 0.80
-> Comando: vender cafe 4
-> Comando: vender pao 3
+> Comando: cadastrar
+> Produto: cafe
+> Quantidade: 10
+> Preco: 450
+> Comando: cadastrar
+> Produto: pao
+> Quantidade: 3
+> Preco: 80
+> Comando: vender
+> Produto: cafe
+> Quantidade: 4
+> Comando: vender
+> Produto: pao
+> Quantidade: 3
 pao esgotado
-> Comando: vender pao 1
+> Comando: vender
+> Produto: pao
+> Quantidade: 1
 estoque insuficiente: 0 disponiveis
-> Comando: consultar cafe
-cafe: 6 unidades a R$ 4.50
+> Comando: consultar
+> Produto: cafe
+cafe - 6 unidades a 450 centavos
 > Comando: fim
-faturamento: R$ 20.40
-mais vendido: cafe (4 unidades)
+faturamento: 2040 centavos
+mais vendido: cafe com 4 unidades
 ```
 
 ### Exemplo 2
 ```
-> Comando: vender bolo 1
+> Comando: vender
+> Produto: bolo
+> Quantidade: 1
 produto inexistente
-> Comando: cadastrar bolo 2 12
-> Comando: cadastrar bolo 5 10
+> Comando: cadastrar
+> Produto: bolo
+> Quantidade: 2
+> Preco: 1200
+> Comando: cadastrar
+> Produto: bolo
+> Quantidade: 5
+> Preco: 1000
 produto ja cadastrado
-> Comando: vender bolo 5
+> Comando: vender
+> Produto: bolo
+> Quantidade: 5
 estoque insuficiente: 2 disponiveis
-> Comando: repor bolo 4
-> Comando: vender bolo 6
+> Comando: repor
+> Produto: bolo
+> Quantidade: 4
+> Comando: vender
+> Produto: bolo
+> Quantidade: 6
 bolo esgotado
-> Comando: consultar
+> Comando: trocar
 comando invalido
 > Comando: fim
-faturamento: R$ 72.00
-mais vendido: bolo (6 unidades)
+faturamento: 7200 centavos
+mais vendido: bolo com 6 unidades
 ```
 
 ### Exemplo 3
 ```
 > Comando: fim
-faturamento: R$ 0.00
+faturamento: 0 centavos
 nenhuma venda
 ```
 
-É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
+**Proibido:** `min`, `max`, `sum`, `sorted`, `filter`, `map`, `enumerate`, `zip`, os métodos `split`, `join`, `upper`, `lower`, `strip`, `replace`, `find`, `index` e `count`, fatiamento (`x[a:b]`), tuplas, sets, list comprehension, `lambda`, `try/except` e `import`.
 
-Testes (entradas → saída):
-- `cadastrar cafe 10 4.50, cadastrar pao 3 0.80, vender cafe 4, vender pao 3, vender pao 1, consultar cafe, fim` → `pao esgotado` / `estoque insuficiente: 0 disponiveis` / `cafe: 6 unidades a R$ 4.50` / `faturamento: R$ 20.40` / `mais vendido: cafe (4 unidades)`
-- `fim` → `faturamento: R$ 0.00` / `nenhuma venda`
-- `vender bolo 1, cadastrar bolo 2 12, cadastrar bolo 5 10, vender bolo 5, repor bolo 4, vender bolo 6, consultar, fim` → `produto inexistente` / `produto ja cadastrado` / `estoque insuficiente: 2 disponiveis` / `bolo esgotado` / `comando invalido` / `faturamento: R$ 72.00` / `mais vendido: bolo (6 unidades)`
-- `cadastrar suco 5 6, cadastrar agua 10 2, vender agua 3, vender suco 2, repor kiwi 3, vender agua 2, consultar agua, fim` → `produto inexistente` / `agua: 5 unidades a R$ 2.00` / `faturamento: R$ 22.00` / `mais vendido: agua (5 unidades)`
-- `cadastrar a 1 1, cadastrar b 1 1, vender b 1, vender a 1, fim` → `b esgotado` / `a esgotado` / `faturamento: R$ 2.00` / `mais vendido: a (1 unidades)`
+Testes:
+- entradas `cadastrar, cafe, 10, 450, cadastrar, pao, 3, 80, vender, cafe, 4, vender, pao, 3, vender, pao, 1, consultar, cafe, fim` → `pao esgotado` / `estoque insuficiente: 0 disponiveis` / `cafe - 6 unidades a 450 centavos` / `faturamento: 2040 centavos` / `mais vendido: cafe com 4 unidades`
+- entradas `fim` → `faturamento: 0 centavos` / `nenhuma venda`
+- entradas `vender, bolo, 1, cadastrar, bolo, 2, 1200, cadastrar, bolo, 5, 1000, vender, bolo, 5, repor, bolo, 4, vender, bolo, 6, trocar, fim` → `produto inexistente` / `produto ja cadastrado` / `estoque insuficiente: 2 disponiveis` / `bolo esgotado` / `comando invalido` / `faturamento: 7200 centavos` / `mais vendido: bolo com 6 unidades`
+- entradas `cadastrar, suco, 5, 600, cadastrar, agua, 5, 300, vender, agua, 2, vender, suco, 2, repor, chips, 3, consultar, chips, consultar, agua, fim` → `produto inexistente` / `produto inexistente` / `agua - 3 unidades a 300 centavos` / `faturamento: 1800 centavos` / `mais vendido: suco com 2 unidades`
+- entradas `cadastrar, a, 1, 100, cadastrar, b, 1, 100, vender, b, 1, vender, a, 1, fim` → `b esgotado` / `a esgotado` / `faturamento: 200 centavos` / `mais vendido: a com 1 unidades`
 
 ---
 
@@ -226,13 +266,13 @@ boletim = {'Ana': {'calc': [4, 4]}, 'Bia': {'calc': [3], 'fis': [6]}}
 ```
 Retorno: `{'calc': ['Ana', 'Bia']}`
 
-É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
+**Proibido:** `min`, `max`, `sum`, `sorted`, `filter`, `map`, `enumerate`, `zip`, os métodos `split`, `join`, `upper`, `lower`, `strip`, `replace`, `find`, `index` e `count`, fatiamento (`x[a:b]`), tuplas, sets, list comprehension, `lambda`, `try/except` e `import`.
 
-Testes (B é o boletim do exemplo de raciocínio):
-- `B` → `{'calc':['Ana'],'prog':['Bia']}`
-- `{'Ana':{'calc':[4,4]},'Bia':{'calc':[3],'fis':[6]}}` → `{'calc':['Ana','Bia']}`
-- `{'Ana':{'calc':[10]}}` → `{}`
-- `{}` → `{}`
+Testes:
+- `alunos_em_risco({'Ana': {'calc': [4, 5, 3], 'prog': [8, 9]}, 'Bia': {'calc': [6, 6], 'prog': [4, 5.5]}, 'Caio': {'calc': [2, 9], 'fis': [5, 5]}})` → `{'calc': ['Ana'], 'prog': ['Bia']}`
+- `alunos_em_risco({'Ana': {'calc': [4, 4]}, 'Bia': {'calc': [3], 'fis': [6]}})` → `{'calc': ['Ana', 'Bia']}`
+- `alunos_em_risco({'Ana': {'calc': [10]}})` → `{}`
+- `alunos_em_risco({})` → `{}`
 
 ---
 
@@ -273,11 +313,11 @@ Para `'x'`: `x → y → z → y`. O `'y'` já estava na cadeia, então há um c
 
 **Dica:** usar `in` em uma lista que cresce funciona, mas pense em como um dicionário de "já visitados" pode deixar essa verificação mais direta.
 
-É proibido o uso das funções `min`, `max`, `sum`, `sorted`, `filter` e `map`.
+**Proibido:** `min`, `max`, `sum`, `sorted`, `filter`, `map`, `enumerate`, `zip`, os métodos `split`, `join`, `upper`, `lower`, `strip`, `replace`, `find`, `index` e `count`, fatiamento (`x[a:b]`), tuplas, sets, list comprehension, `lambda`, `try/except` e `import`.
 
-Testes (I é o dicionário do exemplo de raciocínio):
-- `(I,'edu')` → `['edu','caio','bia','ana']`
-- `(I,'ana')` → `['ana']`
-- `(I,'zeca')` → `['zeca']`
-- `({'a':'b','b':'c','c':'a'},'a')` → `[]`
-- `({'x':'y','y':'z','z':'y'},'x')` → `[]`
+Testes:
+- `cadeia({'bia': 'ana', 'caio': 'bia', 'duda': 'bia', 'edu': 'caio'}, 'edu')` → `['edu', 'caio', 'bia', 'ana']`
+- `cadeia({'bia': 'ana', 'caio': 'bia', 'duda': 'bia', 'edu': 'caio'}, 'ana')` → `['ana']`
+- `cadeia({'bia': 'ana', 'caio': 'bia', 'duda': 'bia', 'edu': 'caio'}, 'zeca')` → `['zeca']`
+- `cadeia({'a': 'b', 'b': 'c', 'c': 'a'}, 'a')` → `[]`
+- `cadeia({'x': 'y', 'y': 'z', 'z': 'y'}, 'x')` → `[]`
